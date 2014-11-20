@@ -18,9 +18,14 @@
 
 		$(document).ready(function(){
 
+			//allow any origin
+			THREE.ImageUtils.crossOrigin = '';
+
+			//create main, intialize
 			var game = new Main($(document).width() - 10, $(document).height() - 20);
 			game.init();
 
+			//update loop
 			function gameUpdate(){
 				game.update();
 				window.requestAnimationFrame(gameUpdate, game.renderer.domElement);
@@ -28,8 +33,6 @@
 
 			gameUpdate();
 		});
-			
-
 			
 		</script>
 

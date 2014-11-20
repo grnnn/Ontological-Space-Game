@@ -7,6 +7,7 @@ var Main = function(w, h){
 	this.renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
 	this.scene = new THREE.Scene();
 
+	this.selected; //selected game element
 
 }
 
@@ -22,13 +23,16 @@ Main.prototype.init = function(){
 
 	this.scene.add(new THREE.AmbientLight(0xeeeeee));
 
-	var g = new GameObject(200, 0, 0, this.scene);
+	var g = new GameObject(500, 0, 0, "http://upload.wikimedia.org/wikipedia/en/thumb/4/42/Supersmashbox.jpg/250px-Supersmashbox.jpg", this.scene);
+
+	this.selected = g;
 
 	this.renderer.render(this.scene, this.camera);
 }
 
 Main.prototype.update = function(){
-	this.camera.lookAt(new THREE.Vector3(100, 0, 0));
+	this.camera.lookAt(new THREE.Vector3(500, 0, 0));
+	this.selected.rotate();
 	this.renderer.render(this.scene, this.camera);
 
 }
