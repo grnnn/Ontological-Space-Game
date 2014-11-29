@@ -8,6 +8,9 @@ var Main = function(w, h, gameFile){
 	this.renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
 	this.scene = new THREE.Scene();
 
+	this.gameSquares = []; //array of games meshes
+	this.squareHash = {}; //hashing object to tie cubes to parent objects
+
 	this.selected; //selected game element
 	this.rightMouseDown; //is right mouse down
 	this.rightLocation = new THREE.Vector2(0, 0); //2d vector for right mouse rotation, stores clicked position of right click
@@ -20,6 +23,9 @@ var Main = function(w, h, gameFile){
 
 	this.xAngle = 0; //track rotation of camera x
 	this.yAngle = -Math.PI/2; //track rotation of camera y
+
+	this.raycaster = new THREE.Raycaster(); //raycaster for selecting objects
+	this.rayVector = new THREE.Vector3(); //utility vector for raycaster
 
 }
 
@@ -55,6 +61,17 @@ Main.prototype.init = function(){
 		e.preventDefault();
 	});
 	document.addEventListener("mousedown", function(e){
+		if(e.which === "1"){
+			that.rayVector.set(that.mousePos.x, that.mousePos.y, 0.1).unproject(that.camera);
+			that.raycaster.ray.set(that.camera.position, vector.sub(that.camera.position).normalize() );
+
+			var intersection = raycaster.intersectObjects( that.gameSquares )[0];
+
+			if(intersection !== null){
+				var gameObj = squareHash[JSON.stringify(intersection)];
+				that.selected = gameObj;
+			}
+		}
 		if(e.which == "3"){
 			that.hasRightPressed = true;
 			that.rightLocation.x = e.pageX;
@@ -137,6 +154,11 @@ Main.prototype.readGames = function(gameFile){
 			//set up physical game object
 			var myGame = data[i];
 			var obj = new GameObject(myGame.x, myGame.y, myGame.z, myGame.gameTitle, myGame.wikipedia, myGame.boxArt, that.scene);
+
+			//add mesh to gameSquares and add mesh to hash
+			that.gameSquares.push(obj.cube);
+			that.squareHash[JSON.stringify(obj.cube)] = obj;
+
 
 			//set first obj to selected, temporary
 			if( i === 0 ) that.selected = obj;

@@ -10,7 +10,6 @@ var GameObject = function(x, y, z, title, wiki, pictureURL, scene){
 	this.image = new Image();
 	this.image.src = pictureURL;
 
-
 	var material = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture(pictureURL)});
 	var blankMaterial =  new THREE.MeshPhongMaterial({ color: 0xeeeeee });
 	var meshFaces = new THREE.MeshFaceMaterial( [blankMaterial, blankMaterial , blankMaterial, blankMaterial, material, material] );
