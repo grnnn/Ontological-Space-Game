@@ -1,8 +1,11 @@
-var GameObject = function(x, y, z, pictureURL, scene){
+var GameObject = function(x, y, z, title, wiki, pictureURL, scene){
 
 	this.x = x;
 	this.y = y;
 	this.z = z;
+
+	this.title = title;
+	this.wiki = wiki;
 
 	this.image = new Image();
 	this.image.src = pictureURL;
@@ -33,16 +36,5 @@ var GameObject = function(x, y, z, pictureURL, scene){
 
 	}
 
-	this.lastTime = (new Date()).getTime();
-
 	
-}
-
-GameObject.prototype.rotate = function() {
-	 // update
-        var time = (new Date()).getTime();
-        var timeDiff = time - this.lastTime;
-        var angleChange = 0.1 * timeDiff * 2 * Math.PI / 1000;
-        this.cube.rotation.y += angleChange;
-        this.lastTime = time;
 }

@@ -10,6 +10,9 @@ var Main = function(w, h){
 	this.selected; //selected game element
 	this.rightMouseDown; //is right mouse down
 
+	this.gamesLoaded = 0; //tracks loaded games
+	this.targetGames = 4; //target for loaded games
+
 }
 
 Main.prototype.init = function(){
@@ -28,18 +31,15 @@ Main.prototype.init = function(){
 
 	this.scene.add(new THREE.AmbientLight(0xeeeeee));
 
-	//create the game object
-	var g = new GameObject(500, 0, 0, "http://upload.wikimedia.org/wikipedia/en/thumb/4/42/Supersmashbox.jpg/250px-Supersmashbox.jpg", this.scene);
+	//read in games
+	this.readGames();
 
 	//get a reference to this
 	var that = this;
 
-	//set selected object, only like this for testing
-	this.selected = g;
 
 	//set what the camera is looking at
 	//we would change this when we are "selected" or not
-	this.camera.lookAt(new THREE.Vector3(this.selected.x, this.selected.y, this.selected.z));
 	this.renderer.render(this.scene, this.camera);
 
 	//context menu and mouse event listenders
@@ -59,16 +59,45 @@ Main.prototype.init = function(){
 }
 
 Main.prototype.update = function(){
-	//rotate the selected object on update
-	this.selected.rotate();
+	if(this.targetGames === this.gamesLoaded){
+		//rotate around the selected object on update
+		this.rotateCamera();
+		this.camera.lookAt(new THREE.Vector3(this.selected.x, this.selected.y, this.selected.z));
 
-	//render on update
-	this.renderer.render(this.scene, this.camera);
+		//render on update
+		this.renderer.render(this.scene, this.camera);
 
-	//what to do when mouse right is held down
-	if(this.rightMouseDown){
-		//placeholder functionality, needs to rotate around object based on mouse movements
-		this.camera.position.x -= 5;
+		//what to do when mouse right is held down
+		if(this.rightMouseDown){
+			//placeholder functionality, needs to rotate around object based on mouse movements
+			this.camera.position.x -= 5;
+		}
 	}
 
+}
+
+Main.prototype.rotateCamera = function(){
+	var time = (new Date()).getTime();
+    var angle = 0.01 * time * 2 * Math.PI / 1000;
+
+    this.camera.position.x = this.selected.x + Math.cos(angle)*500;
+    this.camera.position.z = this.selected.z + Math.sin(angle)*500;
+    this.lastTime = time;
+}
+
+Main.prototype.readGames = function(){
+	var that = this;
+	$.getJSON("res/games.json", function(data){
+		for(var i = 0; i < data.length; i++){
+			//set up physical game object
+			var myGame = data[i];
+			var obj = new GameObject(myGame.x, myGame.y, myGame.z, myGame.gameTitle, myGame.wikipedia, myGame.boxArt, that.scene);
+
+			//set first obj to selected
+			if( i === 0 ) that.selected = obj;
+
+			//Increment global 'gamesLoaded'
+			that.gamesLoaded++;
+		}
+	});
 }
