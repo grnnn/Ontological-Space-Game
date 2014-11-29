@@ -61,14 +61,14 @@ Main.prototype.init = function(){
 		e.preventDefault();
 	});
 	document.addEventListener("mousedown", function(e){
-		if(e.which === "1"){
+		if(e.which == "1"){
 			that.rayVector.set(that.mousePos.x, that.mousePos.y, 0.1).unproject(that.camera);
-			that.raycaster.ray.set(that.camera.position, vector.sub(that.camera.position).normalize() );
+			that.raycaster.ray.set(that.camera.position, that.rayVector.sub(that.camera.position).normalize() );
 
-			var intersection = raycaster.intersectObjects( that.gameSquares )[0];
+			var intersection = that.raycaster.intersectObjects( that.gameSquares )[0];
 
 			if(intersection !== null){
-				var gameObj = squareHash[JSON.stringify(intersection)];
+				var gameObj = that.squareHash[JSON.stringify(intersection)];
 				that.selected = gameObj;
 			}
 		}
