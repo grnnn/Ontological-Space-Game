@@ -7,6 +7,7 @@ var Main = function(w, h, gameFile){
 	this.camera = new THREE.PerspectiveCamera(45, w/h, 1, 10000);
 	this.renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
 	this.scene = new THREE.Scene();
+	//this.controls = new THREE.TrackballControls
 
 	this.gameSquares = []; //array of games meshes
 	this.squareHash = {}; //hashing object to tie cubes to parent objects
@@ -26,6 +27,10 @@ var Main = function(w, h, gameFile){
 
 	this.raycaster = new THREE.Raycaster(); //raycaster for selecting objects
 	this.rayVector = new THREE.Vector3(); //utility vector for raycaster
+
+	this.startVector = new THREE.Vector3(1000, 0, 0);
+	this.endVector = new THREE.Vector3(0, 0, 0);
+	this.zoom = 0.5;
 
 }
 
@@ -56,6 +61,14 @@ Main.prototype.init = function(){
 	//we would change this when we are "selected" or not
 	this.renderer.render(this.scene, this.camera);
 
+
+
+	//Testing Trackball Controls
+	//This can only go well
+
+
+
+
 	//context menu and mouse event listenders
 	document.addEventListener("contextmenu", function(e){
 		e.preventDefault();
@@ -72,6 +85,9 @@ Main.prototype.init = function(){
 				that.selected = gameObj;
 			}
 		}
+
+
+
 		if(e.which == "3"){
 			that.hasRightPressed = true;
 			that.rightLocation.x = e.pageX;
@@ -88,6 +104,18 @@ Main.prototype.init = function(){
 		that.rightMouseDown = false;
 		}
 	});
+	document.onscroll = function(){
+		console.log("blah");
+	};
+	document.addEventListener("keypress", function(e){
+		if(e.which == "119"){
+			that.pushZoom(-1);
+		}
+		else if (e.which == "115"){
+			that.pushZoom(1);
+		}
+	});
+
 }
 
 Main.prototype.update = function(){
@@ -138,12 +166,43 @@ Main.prototype.pushRotateCamera = function(pushX, pushY, position){
 	var offSetZ = 500*Math.sin(this.yAngle)*Math.cos(this.xAngle);
 
 	//Offset coordinates are simply added to position to get camera coordinates
-	this.camera.position.x = position.x + offSetX;
-	this.camera.position.y = position.y + offSetY;
-	this.camera.position.z = position.z + offSetZ;
+	this.startVector.x = position.x + offSetX;
+	this.startVector.y = position.y + offSetY;
+	this.startVector.z = position.z + offSetZ;
 
-	//Make sure the camera is looking at the position
-    this.camera.lookAt(new THREE.Vector3(position.x, position.y, position.z));
+	//Make a call to zoom to change camera
+	this.pushZoom(0);
+
+}
+
+//Push zoom function, for zooming
+Main.prototype.pushZoom = function(push){
+
+	if(push === 1){
+		this.zoom += 0.01;
+	} else if(push === -1){
+		this.zoom -= 0.01;
+	}
+
+	if(this.zoom > 1) this.zoom = 1;
+	if(this.zoom < 0.1) this.zoom = 0.1;
+
+	if(this.selected !== null){
+		this.camera.position.x = this.zoom * (this.selected.x - this.startVector.x);
+		this.camera.position.y = this.zoom * (this.selected.y - this.startVector.y);
+		this.camera.position.z = this.zoom * (this.selected.z - this.startVector.z);
+		//Make sure the camera is looking at the position
+    	this.camera.lookAt(new THREE.Vector3(this.selected.x, this.selected.y, this.selected.z));
+	} else {
+		this.camera.position.x = this.zoom * (this.endVector.x - this.startVector.x);
+		this.camera.position.y = this.zoom * (this.endVector.y - this.startVector.y);
+		this.camera.position.z = this.zoom * (this.endVector.z - this.startVector.z);
+		//Make sure the camera is looking at the position
+    	this.camera.lookAt(new THREE.Vector3(this.endVector.x, this.endVector.y, this.endVector.z));
+	}
+
+	 
+
 }
 
 //Read in the json for games and create a bunch of objects for those games
