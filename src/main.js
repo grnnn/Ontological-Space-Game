@@ -83,6 +83,7 @@ Main.prototype.init = function(){
 			if(intersection !== null){
 				var gameObj = that.squareHash[JSON.stringify(intersection)];
 				that.selected = gameObj;
+				$("#myimage").attr("style", "height:200px;width:200px;border:0 none;background-color:transparent;position:absolute");
 			}
 		}
 
@@ -227,3 +228,12 @@ Main.prototype.readGames = function(gameFile){
 		}
 	});
 }
+
+//Listener for deselecting objects
+$("#myimage").on("click", function(){
+	if(game.selected !== null){
+		game.selected = null;
+		$(this).attr("style", "display: none;");
+	}
+
+});

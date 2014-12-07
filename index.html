@@ -11,18 +11,22 @@
 
 	<body style="background-color: #222222;">
 
+		<input type="image" id="myimage" style="height:200px;width:200px;border:0 none;background-color:transparent;position:absolute" src="media/undo.png"/>
 		<script src="src/game.js"></script>
 		<script src="src/main.js"></script>
 
 		<script>
 
+		var game;
 		$(document).ready(function(){
 
+
 			//allow any origin
+			//<input type="image" id="myimage" style="height:200px;width:200px;border:0 none;background-color: transparent;"  src="media/undo.png"/>
 			THREE.ImageUtils.crossOrigin = '';
 
 			//create main, intialize
-			var game = new Main($(document).width() - 10, $(document).height() - 20, "res/games.json");
+			game = new Main($(document).width() - 10, $(document).height() - 20, "res/games.json");
 			game.init();
 
 			//update loop
