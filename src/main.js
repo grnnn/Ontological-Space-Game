@@ -122,11 +122,14 @@ Main.prototype.init = function(){
 		console.log("blah");
 	};*/
 	document.addEventListener("keypress", function(e){
-		if(e.which == "119"){
+		if(e.which == "115"){
 			that.pushZoom(-1);
 		}
-		else if (e.which == "115"){
+		else if (e.which == "119"){
 			that.pushZoom(1);
+		}
+		else if (e.which == "106"){
+			that.tryPopUp();
 		}
 	});
 
@@ -253,3 +256,23 @@ $("#myimage").on("click", function(){
 	}
 
 });
+Main.prototype.tryPopUp = function(){
+	var page = "http://www.images.google.com/custom";
+
+	var $dialog = $('<div></div>')
+               .html('<iframe style="border: 0px; " src="' + page + '" width="100%" height="100%"></iframe>')
+               .dialog({
+                	title: "Page",
+    				autoOpen: false,
+    				dialogClass: 'dialog_fixed,ui-widget-header',
+    				modal: true,
+    				height: 500,
+    				minWidth: 400,
+    				minHeight: 400,
+    				draggable:true,
+    				/*close: function () { $(this).remove(); },*/
+    				buttons: { "Ok": function () {         $(this).dialog("close"); } }
+               });
+    //$dialog.load(page);
+	$dialog.dialog('open');
+}
