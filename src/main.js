@@ -132,7 +132,9 @@ Main.prototype.init = function(){
 		}
 		else if (e.which == "106"){
 			that.searchYT();
-			console.log(that.selected.gameTitle);
+		}
+		else if (e.which == "107"){
+			that.openWiki();
 		}
 	});
 
@@ -261,6 +263,12 @@ $("#myimage").on("click", function(){
 });
 
 
+
+
+
+
+
+//ALL YOUTUBE STUFF
 function handleAPILoaded(){
 	Main.prototype.handleAPILoaded2();
 
@@ -302,7 +310,8 @@ Main.prototype.searchYT = function(){
   	var request = gapi.client.youtube.search.list({
     	q: q,
     	part: 'id',
-    	type: "video"
+    	type: "video",
+    	safeSearch: "moderate"
   	});
 
   	request.execute(onSearchResponse);
@@ -311,4 +320,29 @@ Main.prototype.searchYT = function(){
 Main.prototype.readyYTAPI = function(){
 	googleApiClientReady();
 
+}
+
+
+
+
+//WIKI STUFF
+Main.prototype.openWiki = function(){
+	var page = this.selected.wiki;
+
+	var $dialog2 = $('<div></div>')
+               .html('<iframe style="border: 0px; " src="' + page + '" width="100%" height="100%"></iframe>')
+               .dialog({
+                	title: "Wikipedia Article",
+    				autoOpen: false,
+    				dialogClass: 'dialog_fixed,ui-widget-header',
+    				modal: false,
+    				height: 500,
+    				width: 800,
+    				minWidth: 400,
+    				minHeight: 400,
+    				draggable:true,
+    				close: function () { $(this).remove(); },
+               });
+    //$dialog.load(page);
+	$dialog2.dialog('open');
 }
