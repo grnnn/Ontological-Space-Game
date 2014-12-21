@@ -8,6 +8,10 @@
 		<script src="lib/jquery.min.js"></script>
 		<script src="lib/jquery-ui.min.js"></script>
 		<script src="https://apis.google.com/js/client.js"></script>
+		<style link="jquery-ui.min.css"></style>
+		<style link="jquery-ui.theme.min.css"></style>
+		<style link="jquery-ui.structure.min.css"></style>
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
 
 	</head>
 
@@ -34,12 +38,15 @@
 			//create main, intialize
 			game = new Main($(document).width() - 10, $(document).height() - 20, "res/games.json");
 			game.init();
+			game.readyYTAPI();
+
 
 			//update loop
 			function gameUpdate(){
 				game.update();
 				window.requestAnimationFrame(gameUpdate, game.renderer.domElement);
 			}
+
 
 			gameUpdate();
 		});

@@ -4,7 +4,7 @@ var GameObject = function(x, y, z, title, wiki, pictureURL, scene){
 	this.y = y;
 	this.z = z;
 
-	this.title = title;
+	this.gameTitle = title;
 	this.wiki = wiki;
 
 	this.image = new Image();
@@ -36,4 +36,7 @@ var GameObject = function(x, y, z, title, wiki, pictureURL, scene){
 	}
 
 	
+}
+GameObject.prototype.getTitle = function(){
+	return this.title;
 }

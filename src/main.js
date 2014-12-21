@@ -29,7 +29,7 @@ var Main = function(w, h, gameFile){
 	this.startVector = new THREE.Vector3(1000, 0, 0);
 	this.endVector = new THREE.Vector3(0, 0, 0);
 	this.zoom = 0.5;
-	this.currVidID = null;
+	this.ready;
 
 
 }
@@ -52,6 +52,7 @@ Main.prototype.init = function(){
 
 	//read in games
 	this.readGames(this.gameFile);
+	this.ready = false;
 
 	//get a reference to this
 	var that = this;
@@ -63,6 +64,7 @@ Main.prototype.init = function(){
 	//set what the camera is looking at
 	//we would change this when we are "selected" or not
 	this.renderer.render(this.scene, this.camera);
+	
 
 
 
@@ -129,7 +131,8 @@ Main.prototype.init = function(){
 			that.pushZoom(1);
 		}
 		else if (e.which == "106"){
-			that.tryPopUp();
+			that.searchYT();
+			console.log(that.selected.gameTitle);
 		}
 	});
 
@@ -258,44 +261,14 @@ $("#myimage").on("click", function(){
 });
 
 
+function handleAPILoaded(){
+	Main.prototype.handleAPILoaded2();
 
-
-/*Main.prototype.onClientLoad = function() {
-	console.log("k");
-	
-    gapi.client.load('youtube', 'v3', onYouTubeApiLoad);
 }
-function onYouTubeApiLoad() {
-    // This API key is intended for use only in this lesson.
-    // See http://goo.gl/PdPA1 to get a key for your own applications.
-    gapi.client.setApiKey('AIzaSyCkI9GbnathWCIQBJH-CX3lKftRthDg-4w');
+Main.prototype.handleAPILoaded2 = function(){
+	this.ready = true;
+	console.log("Search Done");
 }
-Main.prototype.search = function() {
-	console.log("kk");
-    // Use the JavaScript client library to create a search.list() API call.
-    var request = gapi.client.youtube.search.list({
-        part: 'snippet',
-        
-    });
-    
-    
-    // Send the request to the API server,
-    // and invoke onSearchRepsonse() with the response.
-
-}*/
-
-
-function handleAPILoaded() {
-  console.log("Search Ready");
-  var q = "HEYYEYAAEYAAAEYAEYAA";
-  	var request = gapi.client.youtube.search.list({
-    q: q,
-    part: 'id'
-  });
-  console.log(request.length);
-  request.execute(onSearchResponse);
-}
-
 // Search for a specified string.
 function onSearchResponse(response) {
 	showResponse(response);
@@ -304,39 +277,38 @@ function onSearchResponse(response) {
 function showResponse(response) {
     YT = response;
 
-    console.log(YT.items[0].id.videoId);
     var page = "http://www.youtube.com/embed/" + YT.items[0].id.videoId;
 
 	var $dialog = $('<div></div>')
                .html('<iframe style="border: 0px; " src="' + page + '" width="100%" height="100%"></iframe>')
                .dialog({
-                	title: "Page",
+                	title: "Youtube 'Let's Play' Video",
     				autoOpen: false,
     				dialogClass: 'dialog_fixed,ui-widget-header',
-    				modal: true,
+    				modal: false,
     				height: 500,
     				width: 800,
     				minWidth: 400,
     				minHeight: 400,
     				draggable:true,
-    				//close: function () { $(this).remove(); },
+    				close: function () { $(this).remove(); },
                });
     //$dialog.load(page);
 	$dialog.dialog('open');
 
 }
-
-Main.prototype.tryPopUp = function(){
-
-	googleApiClientReady();
-	/*var q = "Heyyeah";
+Main.prototype.searchYT = function(){
+	var q = "Let's Play " + this.selected.gameTitle;
   	var request = gapi.client.youtube.search.list({
-    q: q,
-    part: 'snippet'
-  });
-  console.log("Search Done");*/
+    	q: q,
+    	part: 'id',
+    	type: "video"
+  	});
 
+  	request.execute(onSearchResponse);
+}
 
+Main.prototype.readyYTAPI = function(){
+	googleApiClientReady();
 
-	
 }
