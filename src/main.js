@@ -59,6 +59,7 @@ Main.prototype.init = function(){
 	//youtube player
 	var player;
 	var YT = undefined;
+	var imageSearch;
 
 
 	//set what the camera is looking at
@@ -135,6 +136,9 @@ Main.prototype.init = function(){
 		}
 		else if (e.which == "107"){
 			that.openWiki();
+		}
+		else if (e.which == "108"){
+			that.searchImages();
 		}
 	});
 
@@ -328,6 +332,7 @@ Main.prototype.readyYTAPI = function(){
 //WIKI STUFF
 Main.prototype.openWiki = function(){
 	var page = this.selected.wiki;
+	var that = this;
 
 	var $dialog2 = $('<div></div>')
                .html('<iframe style="border: 0px; " src="' + page + '" width="100%" height="100%"></iframe>')
@@ -345,4 +350,55 @@ Main.prototype.openWiki = function(){
                });
     //$dialog.load(page);
 	$dialog2.dialog('open');
+}
+
+Main.prototype.searchImages = function(){
+
+	google.load('search', '1', {"callback":Main.prototype.OnLoad});
+}
+Main.prototype.OnLoad = function(){
+		
+        // Create an Image Search instance.
+        imageSearch = new google.search.ImageSearch();
+
+        // Set searchComplete as the callback function when a search is 
+        // complete.  The imageSearch object will have results in it.
+        imageSearch.setSearchCompleteCallback(this, searchComplete, null);
+
+        // Find me a beautiful car.
+
+        imageSearch.execute(game.selected.gameTitle);
+      
+
+}
+function searchComplete(){
+	if (imageSearch.results && imageSearch.results.length > 0) {
+		var results = imageSearch.results;
+		var imagesHTML = "";
+        for (var i = 0; i < 5 || i<results.length; i++) {
+            // For each result write it's title and image to the screen
+            var result = results[i];
+            if(result == undefined){}
+            else{
+            	imagesHTML+="<img style='width:600px; height:auto; margin:0 100' src=' " + result.url + " ' >";
+        	}
+            
+        }
+        var $dialog3 = $('<div></div>')
+               .html('<iframe style="border: 0px;" width="0px" height="0px"></iframe>')
+               .dialog({
+                	title: "Google Image Search",
+    				autoOpen: false,
+    				dialogClass: 'dialog_fixed,ui-widget-header',
+    				modal: false,
+    				height: 500,
+    				width: 800,
+    				minWidth: 400,
+    				minHeight: 400,
+    				draggable:true,
+    				close: function () { $(this).remove(); },
+               });
+        $dialog3.append(imagesHTML);
+        $dialog3.dialog('open');
+    }
 }
