@@ -132,7 +132,7 @@ Main.prototype.init = function(){
 			that.pushZoom(1);
 		}
 		else if (e.which == "106"){
-			that.searchYT();
+			that.googleApiClientReady();
 		}
 		else if (e.which == "107"){
 			that.openWiki();
@@ -309,8 +309,13 @@ function showResponse(response) {
 	$dialog.dialog('open');
 
 }
+Main.prototype.googleApiClientReady = function() {
+    gapi.client.setApiKey("AIzaSyCkI9GbnathWCIQBJH-CX3lKftRthDg-4w");
+     gapi.client.load('youtube', 'v3', Main.prototype.searchYT);
+
+}
 Main.prototype.searchYT = function(){
-	var q = "Let's Play " + this.selected.gameTitle;
+	var q = "Let's Play " + game.selected.gameTitle;
   	var request = gapi.client.youtube.search.list({
     	q: q,
     	part: 'id',
@@ -321,10 +326,7 @@ Main.prototype.searchYT = function(){
   	request.execute(onSearchResponse);
 }
 
-Main.prototype.readyYTAPI = function(){
-	googleApiClientReady();
 
-}
 
 
 

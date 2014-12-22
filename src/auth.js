@@ -8,11 +8,21 @@ var OAUTH2_SCOPES = [
 ];
 
 // Upon loading, the Google APIs JS client automatically invokes this callback.
-googleApiClientReady = function() {
-  gapi.auth.init(function() {
+ /*googleApiClientReady = function() {
+    gapi.client.setApiKey("AIzaSyCkI9GbnathWCIQBJH-CX3lKftRthDg-4w");
+     gapi.client.load('youtube', 'v3', function() {
+        var isLoad = true;
+    });
+
+
+
+
+
+
+  /*gapi.auth.init(function() {
     window.setTimeout(checkAuth, 1);
   });
-}
+}*/
 
 // Attempt the immediate OAuth 2.0 client flow as soon as the page loads.
 // If the currently logged-in Google Account has previously authorized
@@ -37,7 +47,11 @@ function handleAuthResult(authResult) {
     loadAPIClientInterfaces();
   } else {
     // Make the #login-link clickable. Attempt a non-immediate OAuth 2.0
-    console.log(authResult.error);
+    gapi.auth.authorize({
+    client_id: OAUTH2_CLIENT_ID,
+    scope: OAUTH2_SCOPES,
+    immediate: false
+  }, handleAuthResult);
   }
 }
 
