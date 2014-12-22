@@ -30,6 +30,8 @@ var Main = function(w, h, gameFile){
 	this.endVector = new THREE.Vector3(0, 0, 0);
 	this.zoom = 0.5;
 	this.ready;
+	this.tbc;
+	this.clock;
 
 
 }
@@ -67,7 +69,12 @@ Main.prototype.init = function(){
 	this.renderer.render(this.scene, this.camera);
 	
 
-
+	/*this.tbc = new THREE.TrackballControls(this.camera);
+	this.tbc.rotateSpeed = 1.0;
+	this.tbc.noRotate = true;
+	this.tbc.panSpeed = 1.0;
+	this.tbc.noPan = true;
+	this.clock = new THREE.Clock();*/
 
 
 
@@ -86,9 +93,16 @@ Main.prototype.init = function(){
 			var intersections = raycaster.intersectObjects(that.gameSquares);
 
 			if(intersections[0] !== undefined){
+				
+				$("#myimage").attr("style", "height:200px;width:200px;border:0 none;background-color:transparent;position:absolute");
 				that.selected = that.squareHash[intersections[0].object.wiki];
 				that.hasRightPressed = false;
 				that.startVector = new THREE.Vector3(that.selected.x + 1000, that.selected.y, that.selected.z);
+				/*that.tbc = new THREE.TrackballControls(that.camera);
+				that.tbc.rotateSpeed = 1.0;
+				that.tbc.noRotate = true;
+				that.tbc.panSpeed = 1.0;
+				that.tbc.noPan = true;*/
 			}
 
 			/*for(var i = 0; i < that.gameSquares.length; i++){
@@ -163,6 +177,14 @@ Main.prototype.update = function(){
 			if(yMovement < -0.02) yMovement = -0.01;
 			this.pushRotateCamera(xMovement, yMovement, this.selected);
 			
+		}
+		if(this.selected != undefined){
+			
+		}
+		else{
+			
+			var delta = this.clock.getDelta();
+			this.tbc.update(delta);
 		}
 
 		//render on update
@@ -261,6 +283,7 @@ Main.prototype.readGames = function(gameFile){
 $("#myimage").on("click", function(){
 	if(game.selected !== null){
 		game.selected = null;
+		//game.tbc.noPan = false;
 		$(this).attr("style", "display: none;");
 	}
 
@@ -354,6 +377,9 @@ Main.prototype.openWiki = function(){
 	$dialog2.dialog('open');
 }
 
+
+
+//GOOGLE IMAGES STUFF
 Main.prototype.searchImages = function(){
 
 	google.load('search', '1', {"callback":Main.prototype.OnLoad});
@@ -367,7 +393,6 @@ Main.prototype.OnLoad = function(){
         // complete.  The imageSearch object will have results in it.
         imageSearch.setSearchCompleteCallback(this, searchComplete, null);
 
-        // Find me a beautiful car.
 
         imageSearch.execute(game.selected.gameTitle);
       

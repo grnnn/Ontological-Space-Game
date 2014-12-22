@@ -37,6 +37,3 @@ var GameObject = function(x, y, z, title, wiki, pictureURL, scene){
 
 	
 }
-GameObject.prototype.getTitle = function(){
-	return this.title;
-}
