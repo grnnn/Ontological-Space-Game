@@ -6,7 +6,6 @@ var Main = function(w, h, gameFile){
 	this.camera = new THREE.PerspectiveCamera(45, w/h, 1, 10000);
 	this.renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
 	this.scene = new THREE.Scene();
-	//this.controls = new THREE.TrackballControls
 
 	this.gameSquares = []; //array of games meshes
 	this.squareHash = {}; //hashing object to tie cubes to parent objects
@@ -69,12 +68,13 @@ Main.prototype.init = function(){
 	this.renderer.render(this.scene, this.camera);
 	
 
-	/*this.tbc = new THREE.TrackballControls(this.camera);
-	this.tbc.rotateSpeed = 1.0;
-	this.tbc.noRotate = true;
-	this.tbc.panSpeed = 1.0;
+	this.tbc = new THREE.TrackballControls(this.camera);
+	this.tbc.rotateSpeed = 0.15;
+	this.tbc.noRotate = true;;
+	this.tbc.panSpeed = 0.5;
 	this.tbc.noPan = true;
-	this.clock = new THREE.Clock();*/
+	this.clock = new THREE.Clock();
+	this.tbc.dynamicDampingFactor = 0.9;
 
 
 
@@ -98,11 +98,14 @@ Main.prototype.init = function(){
 				that.selected = that.squareHash[intersections[0].object.wiki];
 				that.hasRightPressed = false;
 				that.startVector = new THREE.Vector3(that.selected.x + 1000, that.selected.y, that.selected.z);
-				/*that.tbc = new THREE.TrackballControls(that.camera);
-				that.tbc.rotateSpeed = 1.0;
+				that.tbc = new THREE.TrackballControls(that.camera);
+				that.tbc.target = new THREE.Vector3(that.selected.x, that.selected.y, that.selected.z);
+				that.tbc.rotateSpeed = 0.15;
 				that.tbc.noRotate = true;
-				that.tbc.panSpeed = 1.0;
-				that.tbc.noPan = true;*/
+				that.tbc.panSpeed = 0.5;
+				that.tbc.noPan = true;
+				that.tbc.dynamicDampingFactor = 0.9;
+
 			}
 
 			/*for(var i = 0; i < that.gameSquares.length; i++){
@@ -178,14 +181,12 @@ Main.prototype.update = function(){
 			this.pushRotateCamera(xMovement, yMovement, this.selected);
 			
 		}
-		if(this.selected != undefined){
-			
-		}
-		else{
+		
+		
 			
 			var delta = this.clock.getDelta();
 			this.tbc.update(delta);
-		}
+		
 
 		//render on update
 		this.renderer.render(this.scene, this.camera);
@@ -283,7 +284,8 @@ Main.prototype.readGames = function(gameFile){
 $("#myimage").on("click", function(){
 	if(game.selected !== null){
 		game.selected = null;
-		//game.tbc.noPan = false;
+		game.tbc.noPan = false;
+		game.tbc.noRotate = false;
 		$(this).attr("style", "display: none;");
 	}
 
