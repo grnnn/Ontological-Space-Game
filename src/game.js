@@ -1,8 +1,6 @@
 var GameObject = function(x, y, z, title, wiki, pictureURL, scene){
 
-	this.x = x;
-	this.y = y;
-	this.z = z;
+	this.position = new THREE.Vector3(x, y, z);
 
 	this.gameTitle = title;
 	this.wiki = wiki;
