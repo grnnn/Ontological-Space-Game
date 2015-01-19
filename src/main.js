@@ -125,7 +125,7 @@ Main.prototype.init = function(){
 
 				if(intersections[0] !== undefined){
 					
-					$("#myimage").attr("style", "height:200px;width:200px;border:0 none;background-color:transparent;position:absolute");
+					$("#unselect").attr("style", "background-color:#222222;position:absolute");
 					if(that.squareHash[intersections[0].object.wiki] !== that.selected){
 						that.selected = that.squareHash[intersections[0].object.wiki];
 						that.hasRightPressed = false;
@@ -328,7 +328,7 @@ Main.prototype.readGames = function(gameFile){
 }
 
 //Listener for deselecting objects
-$("#myimage").on("click", function(){
+$("#unselect").on("click", function(){
 	if(game.selected !== null){
 		game.selected = null;
 		//game.tbc.noPan = false;
