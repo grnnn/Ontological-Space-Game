@@ -30,13 +30,6 @@ var Main = function(w, h, gameFile){
 
 	this.rayVector = new THREE.Vector3(); //utility vector for raycaster
 
-	this.startVector = new THREE.Vector3(1000, 0, 0);
-	this.endVector = new THREE.Vector3(0, 0, 0);
-	this.zoom = 0.5;
-	this.ready;
-	this.tbc;
-	this.clock;
-
 
 }
 
@@ -155,10 +148,15 @@ Main.prototype.init = function(){
 	};*/
 	document.addEventListener("keypress", function(e){
 		if(e.which == "115"){
-			that.pushZoom(-1);
+			if(that.selected == null){
+				that.pushZoom(-10);
+			}
 		}
 		else if (e.which == "119"){
-			that.pushZoom(1);
+			
+			if(that.selected == null){
+				that.pushZoom(10);
+			}
 		}
 		else if (e.which == "106"){
 			that.googleApiClientReady();
@@ -270,32 +268,19 @@ Main.prototype.pushRotateCamera = function(pushX, pushY, position, distance){
 
 //Push zoom function, for zooming
 Main.prototype.pushZoom = function(push){
+	var cameraMovementVec = new THREE.Vector3(0, 0, -push);
 
-	if(push === 1){
-		this.zoom += 0.01;
-	} else if(push === -1){
-		this.zoom -= 0.01;
-	}
+	cameraMovementVec.applyQuaternion( this.camera.quaternion );
 
-	if(this.zoom > 1) this.zoom = 1;
-	if(this.zoom < 0.1) this.zoom = 0.1;
+	var nextPos = new THREE.Vector3(cameraMovementVec.x + this.camera.position.x,
+								  cameraMovementVec.y + this.camera.position.y,
+								  cameraMovementVec.z + this.camera.position.z);
 
-	if(this.selected !== null){
-		this.camera.position.x = this.startVector.x + this.zoom * (this.selected.x - this.startVector.x);
-		this.camera.position.y = this.startVector.y + this.zoom * (this.selected.y - this.startVector.y);
-		this.camera.position.z = this.startVector.z + this.zoom * (this.selected.z - this.startVector.z);
-		//Make sure the camera is looking at the position
-    	this.camera.lookAt(new THREE.Vector3(this.selected.x, this.selected.y, this.selected.z));
-	} else {
-		this.camera.position.x = this.startVector.x + this.zoom * (this.endVector.x - this.startVector.x);
-		this.camera.position.y = this.startVector.y + this.zoom * (this.endVector.y - this.startVector.y);
-		this.camera.position.z = this.startVector.z + this.zoom * (this.endVector.z - this.startVector.z);
-		//Make sure the camera is looking at the position
-    	this.camera.lookAt(new THREE.Vector3(this.endVector.x, this.endVector.y, this.endVector.z));
-	}
+	this.camera.position.set(nextPos.x, nextPos.y, nextPos.z);
 
 }
 
+//Pan camera function
 Main.prototype.pushPan = function(pushX, pushY){
 	this.camera.translateX(pushX);
 	this.camera.translateY(pushY);
