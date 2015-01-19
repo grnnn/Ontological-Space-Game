@@ -64,15 +64,6 @@ Main.prototype.init = function(){
 	//set what the camera is looking at
 	//we would change this when we are "selected" or not
 	this.renderer.render(this.scene, this.camera);
-	
-
-	/*this.tbc = new THREE.TrackballControls(this.camera);
-	this.tbc.rotateSpeed = 0.15;
-	this.tbc.noRotate = true;;
-	this.tbc.panSpeed = 0.5;
-	this.tbc.noPan = true;
-	this.clock = new THREE.Clock();
-	this.tbc.dynamicDampingFactor = 0.9;*/
 
 
 
@@ -119,19 +110,14 @@ Main.prototype.init = function(){
 				if(intersections[0] !== undefined){
 					
 					$("#unselect").attr("style", "background-color:#222222;position:absolute");
-					if(that.squareHash[intersections[0].object.wiki] !== that.selected){
-						that.selected = that.squareHash[intersections[0].object.wiki];
+					if(that.squareHash[intersections[0].object.id] !== that.selected){
+						if(that.selected != null) that.selected.unSelect();
+						that.selected = that.squareHash[intersections[0].object.id];
 						that.hasRightPressed = false;
-						that.startVector = new THREE.Vector3(that.selected.x + 1000, that.selected.y, that.selected.z);
+						that.startVector = new THREE.Vector3(that.selected.x + 500, that.selected.y, that.selected.z);
+						that.selected.select();
 					}
 					
-					/*that.tbc = new THREE.TrackballControls(that.camera);
-					that.tbc.target = new THREE.Vector3(that.selected.x, that.selected.y, that.selected.z);
-					that.tbc.rotateSpeed = 0.15;
-					that.tbc.noRotate = true;
-					that.tbc.panSpeed = 0.5;
-					that.tbc.noPan = true;
-					that.tbc.dynamicDampingFactor = 0.9;*/
 
 				}
 			}
@@ -143,19 +129,16 @@ Main.prototype.init = function(){
 			that.rightMouseDown = false;
 		}
 	});
-	/*document.onscroll = function(){
-		console.log("blah");
-	};*/
 	document.addEventListener("keypress", function(e){
 		if(e.which == "115"){
 			if(that.selected == null){
-				that.pushZoom(-10);
+				that.pushZoom(-50);
 			}
 		}
 		else if (e.which == "119"){
 			
 			if(that.selected == null){
-				that.pushZoom(10);
+				that.pushZoom(50);
 			}
 		}
 		else if (e.which == "106"){
@@ -176,7 +159,7 @@ Main.prototype.update = function(){
 
 		//rotate around the selected object on update, only if the right mouse button hasn't been clicked for that object
 		if(!this.hasRightPressed && this.selected !== null){
-			this.pushRotateCamera(0.001, 0, this.selected.position, 1000);
+			this.pushRotateCamera(0.001, 0, this.selected.position, 500);
 		}
 
 		//what to do when mouse right is held down:
@@ -189,7 +172,7 @@ Main.prototype.update = function(){
 			if(xMovement < -0.03) xMovement = -0.03;
 			if(yMovement > 0.01) yMovement = 0.01;
 			if(yMovement < -0.01) yMovement = -0.01;
-			this.pushRotateCamera(xMovement, yMovement, this.selected.position, 1000);
+			this.pushRotateCamera(xMovement, yMovement, this.selected.position, 500);
 			
 		}
 
@@ -224,8 +207,6 @@ Main.prototype.update = function(){
 		
 		
 			
-			//var delta = this.clock.getDelta();
-			//this.tbc.update(delta);
 		
 
 		//render on update
@@ -288,36 +269,81 @@ Main.prototype.pushPan = function(pushX, pushY){
 
 //Read in the json for games and create a bunch of objects for those games
 Main.prototype.readGames = function(gameFile){
+	//First load The textures
+	this.texturesLoaded = false;
+
+	var wikiTexLoaded = false;
+	var picTexLoaded = false;
+	var utubeTexLoaded = false;
+
 	var that = this;
-	$.getJSON(gameFile, function(data){
+
+	this.wikiTex = THREE.ImageUtils.loadTexture("media/wiki_logo.png", undefined, function(){
+		wikiTexLoaded = true;
+		if(wikiTexLoaded && picTexLoaded && utubeTexLoaded){
+			that.texturesLoaded = true;
+		}
+	}, function(){
+		alert("Wikipedia Texture failed to load");
+	});
+
+	this.utubeTex = THREE.ImageUtils.loadTexture("media/youtube_logo.png", undefined, function(){
+		picTexLoaded = true;
+		if(wikiTexLoaded && picTexLoaded && utubeTexLoaded){
+			that.texturesLoaded = true;
+		}
+	}, function(){
+		alert("Youtube Texture failed to load");
+	});
+
+	this.picTex = THREE.ImageUtils.loadTexture("media/Camera_icon.png", undefined, function(){
+		utubeTexLoaded = true;
+		if(wikiTexLoaded && picTexLoaded && utubeTexLoaded){
+			that.texturesLoaded = true;
+		}
+	}, function(){
+		alert("Picture Texture failed to load");
+	});
+
+	this.gamesLoaded = false;
+
+
+	var thingy = $.getJSON(gameFile, function(data){
+		console.log("boop 3");
 		for(var i = 0; i < data.length; i++){
 			//set up physical game object
 			var myGame = data[i];
-			var obj = new GameObject(myGame.x, myGame.y, myGame.z, myGame.gameTitle, myGame.wikipedia, myGame.boxArt, that.scene);
+
+			var obj = new GameObject(myGame.id, myGame.coords[0]*10000, myGame.coords[1]*10000, myGame.coords[2]*10000, myGame.title, myGame["wiki_url"], myGame.platform, myGame.year, that.wikiTex, that.utubeTex, that.picTex, that.scene);
 
 			//set an arbitrary identifier for hashing, make it the wiki link, since that's already unique and garaunteed
-			obj.cube.wiki = obj.wiki;
+			obj.main.id = obj.id;
 
 			//add mesh to gameSquares and add mesh to hash
-			that.gameSquares.push(obj.cube);
-			that.squareHash[obj.cube.wiki] = obj;
+			that.gameSquares.push(obj.main);
+			that.squareHash[obj.main.id] = obj;
 
 
 			//set first obj to selected, temporary
-			if( i === 0 ) that.selected = obj;
+			if( i === 0 ) {
+				that.selected = obj;
+				obj.select();
+			}
 
 			//Increment 'gamesLoaded', for update check
-			that.gamesLoaded++;
+			//that.gamesLoaded++;
+			console.log(myGame.id);
 		}
+	}).fail(function(){
+		console.log("U wot m8");
 	});
 }
 
 //Listener for deselecting objects
 $("#unselect").on("click", function(){
 	if(game.selected !== null){
+		game.selected.unSelect();
 		game.selected = null;
-		//game.tbc.noPan = false;
-		//game.tbc.noRotate = false;
 		$(this).attr("style", "display: none;");
 	}
 
