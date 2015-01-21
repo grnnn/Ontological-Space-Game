@@ -2,6 +2,7 @@ var GameObject = function(id, x, y, z, title, wiki, platform, year, wikiTex, utu
 
 	this.position = new THREE.Vector3(x, y, z);
 
+
 	this.id = id;
 	this.platform = platform;
 	this.year = year;
@@ -19,45 +20,43 @@ var GameObject = function(id, x, y, z, title, wiki, platform, year, wikiTex, utu
 	this.scene = scene;
 
 	this.q1 = new THREE.Mesh(
-		new THREE.SphereGeometry(50, 10, 10, 0, Math.PI/2, 0, Math.PI),
+		new THREE.SphereGeometry(50, 7, 7, 0, Math.PI/2, 0, Math.PI),
 		new THREE.MeshPhongMaterial( { map: wikiTex, visible: false } ) );
 	this.q2 = new THREE.Mesh(
-		new THREE.SphereGeometry(50, 10, 10, Math.PI/2, Math.PI/2, 0, Math.PI),
+		new THREE.SphereGeometry(50, 7, 7, Math.PI/2, Math.PI/2, 0, Math.PI),
 		new THREE.MeshPhongMaterial( { map: utubeTex, visible: false } ) );
 	this.q3 = new THREE.Mesh(
-		new THREE.SphereGeometry(50, 10, 10, Math.PI, Math.PI/2, 0, Math.PI),
+		new THREE.SphereGeometry(50, 7, 7, Math.PI, Math.PI/2, 0, Math.PI),
 		new THREE.MeshPhongMaterial( { map: picTex, visible: false } ) );
 	this.q4 = new THREE.Mesh(
-		new THREE.SphereGeometry(50, 10, 10, 3*Math.PI/2, Math.PI/2, 0, Math.PI),
+		new THREE.SphereGeometry(50, 7, 7, 3*Math.PI/2, Math.PI/2, 0, Math.PI),
 		new THREE.MeshPhongMaterial( {color: 0xffffff, visible: false} ) );
+
+
+	/*this.q1 = new THREE.Mesh(
+		new THREE.SphereGeometry(50, 5, 5, 0, Math.PI/2, 0, Math.PI),
+		new THREE.MeshPhongMaterial( { color: 0xffffff, visible: false } ) );
+	this.q2 = new THREE.Mesh(
+		new THREE.SphereGeometry(50, 5, 5, Math.PI/2, Math.PI/2, 0, Math.PI),
+		new THREE.MeshPhongMaterial( { color: 0xffffff, visible: false } ) );
+	this.q3 = new THREE.Mesh(
+		new THREE.SphereGeometry(50, 5, 5, Math.PI, Math.PI/2, 0, Math.PI),
+		new THREE.MeshPhongMaterial( { color: 0xffffff, visible: false } ) );
+	this.q4 = new THREE.Mesh(
+		new THREE.SphereGeometry(50, 5, 5, 3*Math.PI/2, Math.PI/2, 0, Math.PI),
+		new THREE.MeshPhongMaterial( {color: 0xffffff, visible: false} ) );*/
 
 	var that = this; 
 
 	this.main = new THREE.Mesh(
-		new THREE.SphereGeometry(50, 10, 10),
+		new THREE.SphereGeometry(50, 5, 5),
 		new THREE.MeshPhongMaterial( {  color: 0xffffff } ) );
 
-	/*this.image.onload = function(){
-		
-		that.cube.scale.x = this.width/10;
-		that.cube.scale.y = this.height/10;
 
-		
-
-	}*/
-
-	that.q1.position.x = x;
-	that.q1.position.y = y;
-	that.q1.position.z = z;
-	that.q2.position.x = x;
-	that.q2.position.y = y;
-	that.q2.position.z = z;
-	that.q3.position.x = x;
-	that.q3.position.y = y;
-	that.q3.position.z = z;
-	that.q4.position.x = x;
-	that.q4.position.y = y;
-	that.q4.position.z = z;
+	that.q1.position.set(x, y, z);
+	that.q2.position.set(x, y, z);
+	that.q3.position.set(x, y, z);
+	that.q4.position.set(x, y, z);
 
 	that.main.position.set(x, y, z);
 

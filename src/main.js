@@ -155,8 +155,7 @@ Main.prototype.init = function(){
 }
 
 Main.prototype.update = function(){
-	if(this.targetGames === this.gamesLoaded){
-
+	if(this.gamesLoaded){
 		//rotate around the selected object on update, only if the right mouse button hasn't been clicked for that object
 		if(!this.hasRightPressed && this.selected !== null){
 			this.pushRotateCamera(0.001, 0, this.selected.position, 500);
@@ -208,7 +207,6 @@ Main.prototype.update = function(){
 		
 			
 		
-
 		//render on update
 		this.renderer.render(this.scene, this.camera);
 	}
@@ -307,14 +305,12 @@ Main.prototype.readGames = function(gameFile){
 
 	this.gamesLoaded = false;
 
-
-	var thingy = $.getJSON(gameFile, function(data){
-		console.log("boop 3");
+	function load(data){
 		for(var i = 0; i < data.length; i++){
 			//set up physical game object
 			var myGame = data[i];
 
-			var obj = new GameObject(myGame.id, myGame.coords[0]*10000, myGame.coords[1]*10000, myGame.coords[2]*10000, myGame.title, myGame["wiki_url"], myGame.platform, myGame.year, that.wikiTex, that.utubeTex, that.picTex, that.scene);
+			var obj = new GameObject(myGame.id, myGame.coords[0]*30000, myGame.coords[1]*30000, myGame.coords[2]*30000, myGame.title, myGame["wiki_url"], myGame.platform, myGame.year, that.wikiTex, that.utubeTex, that.picTex, that.scene);
 
 			//set an arbitrary identifier for hashing, make it the wiki link, since that's already unique and garaunteed
 			obj.main.id = obj.id;
@@ -327,16 +323,64 @@ Main.prototype.readGames = function(gameFile){
 			//set first obj to selected, temporary
 			if( i === 0 ) {
 				that.selected = obj;
-				obj.select();
+				that.selected.select();
 			}
 
 			//Increment 'gamesLoaded', for update check
 			//that.gamesLoaded++;
 			console.log(myGame.id);
 		}
-	}).fail(function(){
-		console.log("U wot m8");
+		that.gamesLoaded = true;
+	}
+
+	$.getJSON(gameFile, load).fail(function(){
+		console.log("JSON loading failed");
 	});
+
+	$.getJSON("res/games2.json", load).fail(function(){
+		console.log("JSON loading failed");
+	});
+/*
+	$.getJSON("res/games3.json", load).fail(function(){
+		console.log("JSON loading failed");
+	});
+
+	$.getJSON("res/games4.json", load).fail(function(){
+		console.log("JSON loading failed");
+	});
+
+	$.getJSON("res/games5.json", load).fail(function(){
+		console.log("JSON loading failed");
+	});
+
+	$.getJSON("res/games6.json", load).fail(function(){
+		console.log("JSON loading failed");
+	});
+
+	$.getJSON("res/games7.json", load).fail(function(){
+		console.log("JSON loading failed");
+	});
+
+	$.getJSON("res/games8.json", load).fail(function(){
+		console.log("JSON loading failed");
+	});
+
+	$.getJSON("res/games9.json", load).fail(function(){
+		console.log("JSON loading failed");
+	});
+
+	$.getJSON("res/games10.json", load).fail(function(){
+		console.log("JSON loading failed");
+	});
+
+	$.getJSON("res/games11.json", load).fail(function(){
+		console.log("JSON loading failed");
+	});
+
+	$.getJSON("res/games12.json", load).fail(function(){
+		console.log("JSON loading failed");
+	});
+*/
 }
 
 //Listener for deselecting objects
