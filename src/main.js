@@ -29,6 +29,7 @@ var Main = function(w, h, gameFile){
 	this.yAngle = -Math.PI/2; //track rotation of camera y
 
 	this.rayVector = new THREE.Vector3(); //utility vector for raycaster
+	this.loader;
 
 
 }
@@ -150,6 +151,9 @@ Main.prototype.init = function(){
 		else if (e.which == "108"){
 			that.searchImages();
 		}
+		else if (e.which == "109"){
+			that.searchGamenet();
+		}
 	});
 
 }
@@ -267,6 +271,39 @@ Main.prototype.pushPan = function(pushX, pushY){
 
 //Read in the json for games and create a bunch of objects for those games
 Main.prototype.readGames = function(gameFile){
+
+
+
+
+/*var $loading = $('<div></div>')
+               .dialog({
+                	title: "Loading",
+    				autoOpen: false,
+    				dialogClass: 'dialog_fixed,ui-widget-header',
+    				modal: true,
+    				height: 500,
+    				width: 800,
+    				minWidth: 400,
+    				minHeight: 400,
+    				draggable:true,
+    				progress:true,
+    				close: function () { $(this).remove(); },
+               });
+
+
+
+
+	
+	$loading.dialog('open');*/
+
+
+
+
+
+
+
+
+
 	//First load The textures
 	this.texturesLoaded = false;
 
@@ -304,6 +341,8 @@ Main.prototype.readGames = function(gameFile){
 	});
 
 	function load(data){
+
+
 		for(var i = 0; i < data.length; i++){
 			//set up physical game object
 			var myGame = data[i];
@@ -329,6 +368,7 @@ Main.prototype.readGames = function(gameFile){
 			
 
 			that.gamesLoaded++;
+			//$loading.progressbar(that.gamesLoaded);
 		}
 		console.log("Loaded " + that.gamesLoaded + " games");
 		
@@ -427,6 +467,16 @@ function handleAPILoaded(){
 	Main.prototype.handleAPILoaded2();
 
 }
+function callProgress(step){
+	if(step == 1){
+		$("#progressbar").fadeOut(4000);
+		$("#progressbar").fadeIn(4000);
+	}
+	$("#progressbar").progressbar({
+		value: step
+	});
+}
+
 Main.prototype.handleAPILoaded2 = function(){
 	this.ready = true;
 	console.log("Search Done");
@@ -474,6 +524,31 @@ Main.prototype.searchYT = function(){
   	});
 
   	request.execute(onSearchResponse);
+}
+
+
+
+Main.prototype.searchGamenet = function(){
+	console.log("Sweg");
+	var id = this.selected.id;
+	var that = this;
+
+	var $dialog4 = $('<div></div>')
+               .html('<iframe style="border: 0px; " src="http://gamecip-projects.soe.ucsc.edu/gamenet/games/' + id + '" width="100%" height="100%"></iframe>')
+               .dialog({
+                	title: "Gamenet Page",
+    				autoOpen: false,
+    				dialogClass: 'dialog_fixed,ui-widget-header',
+    				modal: false,
+    				height: 500,
+    				width: 800,
+    				minWidth: 400,
+    				minHeight: 400,
+    				draggable:true,
+    				close: function () { $(this).remove(); },
+               });
+    //$dialog.load(page);
+	$dialog4.dialog('open');
 }
 
 
