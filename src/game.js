@@ -21,7 +21,7 @@ var GameObject = function(id, x, y, z, title, wiki, platform, year, scene){
 
 	this.main = new THREE.Mesh(
 		new THREE.SphereGeometry(50, 5, 5),
-		new THREE.MeshPhongMaterial( {  color: 0xffffff } ) );
+		new THREE.MeshLambertMaterial( {  color: 0xffffff } ) );
 
 
 	this.main.position.set(x, y, z);
@@ -56,6 +56,11 @@ GameObject.prototype.select = function(wikiTex, utubeTex, picTex){
 	this.scene.add(this.q2);
 	this.scene.add(this.q3);
 	this.scene.add(this.q4);
+
+	this.q1.funk = "wiki";
+	this.q2.funk = "utube";
+	this.q3.funk = "pix";
+	this.q4.funk = "gamenet";
 }
 
 GameObject.prototype.unSelect = function(){

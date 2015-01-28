@@ -32,9 +32,45 @@ var Main = function(w, h, gameFile){
 	this.loader;
 
 
+	this.startId = 0; // starting game id
+
+
 }
 
 Main.prototype.init = function(){
+
+	var QueryString = function () {
+      // This function is anonymous, is executed immediately and
+      // the return value is assigned to QueryString!
+      var query_string = {};
+      var query = window.location.search.substring(1);
+      var vars = query.split("&");
+      for (var i=0;i<vars.length;i++) {
+        var pair = vars[i].split("=");
+            // If first entry with this name
+        if (typeof query_string[pair[0]] === "undefined") {
+          query_string[pair[0]] = pair[1];
+            // If second entry with this name
+        } else if (typeof query_string[pair[0]] === "string") {
+          var arr = [ query_string[pair[0]], pair[1] ];
+          query_string[pair[0]] = arr;
+            // If third or later entry with this name
+        } else {
+          query_string[pair[0]].push(pair[1]);
+        }
+      }
+        return query_string;
+    } ();
+
+    var path = QueryString.u;
+   
+    if(path != undefined){
+    	path = path.replace("/", "");
+    	this.startId = parseInt(path);
+    	console.log("Starting at ID: " + this.startId);
+    }
+
+
 	this.renderer.setSize(this.width, this.height);
 	document.body.appendChild(this.renderer.domElement);
 	this.renderer.setClearColor(0x000000, 1.0);
@@ -109,14 +145,33 @@ Main.prototype.init = function(){
 				var intersections = raycaster.intersectObjects(that.gameSquares);
 
 				if(intersections[0] !== undefined){
-					
-					$("#unselect").attr("style", "background-color:#222222;position:absolute");
-					if(that.squareHash[intersections[0].object.id] !== that.selected){
+					$("#unselect").attr("style", "background-color:#000000;position:absolute");
+					if(that.squareHash[intersections[0].object.id] !== that.selected && intersections[0].object.funk == undefined){
 						if(that.selected != null) that.selected.unSelect();
 						that.selected = that.squareHash[intersections[0].object.id];
 						that.hasRightPressed = false;
 						that.startVector = new THREE.Vector3(that.selected.x + 500, that.selected.y, that.selected.z);
-						that.selected.select(that.wikiTex, that.utubeTex, that.picTex);
+						that.q1.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+						that.q2.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+						that.q3.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+						that.q4.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+						that.q1.material.visible = true;
+						that.q2.material.visible = true;
+						that.q3.material.visible = true;
+						that.q4.material.visible = true;
+					}
+					
+					if(intersections[0].object.funk === "wiki"){
+						that.openWiki();
+					}
+					else if(intersections[0].object.funk === "utube"){
+						that.googleApiClientReady();
+					}
+					else if(intersections[0].object.funk === "pix"){
+						that.searchImages();
+					}
+					else if(intersections[0].object.funk === "gamenet"){
+						that.searchGamenet();
 					}
 					
 
@@ -154,6 +209,7 @@ Main.prototype.init = function(){
 		else if (e.which == "109"){
 			that.searchGamenet();
 		}
+		console.log(e.which);
 	});
 
 }
@@ -329,6 +385,36 @@ var $loading = $('<div></div>')
 		alert("Picture Texture failed to load");
 	});
 
+
+	//Set up quarter meshes
+	this.q1 = new THREE.Mesh(
+		new THREE.SphereGeometry(53, 7, 7, 0, Math.PI/2, 0, Math.PI),
+		new THREE.MeshPhongMaterial( { map: this.wikiTex } ) );
+	this.q2 = new THREE.Mesh(
+		new THREE.SphereGeometry(53, 7, 7, Math.PI/2, Math.PI/2, 0, Math.PI),
+		new THREE.MeshPhongMaterial( { map: this.utubeTex } ) );
+	this.q3 = new THREE.Mesh(
+		new THREE.SphereGeometry(53, 7, 7, Math.PI, Math.PI/2, 0, Math.PI),
+		new THREE.MeshPhongMaterial( { map: this.picTex } ) );
+	this.q4 = new THREE.Mesh(
+		new THREE.SphereGeometry(53, 7, 7, 3*Math.PI/2, Math.PI/2, 0, Math.PI),
+		new THREE.MeshPhongMaterial( {color: 0xffffff} ) );
+
+	this.scene.add(this.q1);
+	this.scene.add(this.q2);
+	this.scene.add(this.q3);
+	this.scene.add(this.q4);
+
+	this.q1.funk = "wiki";
+	this.q2.funk = "utube";
+	this.q3.funk = "pix";
+	this.q4.funk = "gamenet";
+
+	this.gameSquares.push(this.q1);
+	this.gameSquares.push(this.q2);
+	this.gameSquares.push(this.q3);
+	this.gameSquares.push(this.q4);
+
 	function load(data){
 
 
@@ -347,13 +433,13 @@ var $loading = $('<div></div>')
 
 
 			//set first obj to selected
-			if(obj.id == 0){
+			if(obj.id == that.startId){
 				that.selected = obj;
-				that.selected.select(that.wikiTex, that.utubeTex, that.picTex);
+				that.q1.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+				that.q2.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+				that.q3.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+				that.q4.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
 			}
-
-			//Increment 'gamesLoaded', for update check
-			//that.gamesLoaded++;
 			
 
 			that.gamesLoaded++;
@@ -442,7 +528,10 @@ var $loading = $('<div></div>')
 //Listener for deselecting objects
 $("#unselect").on("click", function(){
 	if(game.selected !== null){
-		game.selected.unSelect();
+		game.q1.material.visible = false;
+		game.q2.material.visible = false;
+		game.q3.material.visible = false;
+		game.q4.material.visible = false;
 		game.selected = null;
 		$(this).attr("style", "display: none;");
 	}
