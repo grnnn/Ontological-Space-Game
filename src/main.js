@@ -37,7 +37,7 @@ var Main = function(w, h, gameFile){
 Main.prototype.init = function(){
 	this.renderer.setSize(this.width, this.height);
 	document.body.appendChild(this.renderer.domElement);
-	this.renderer.setClearColor(0x222222, 1.0);
+	this.renderer.setClearColor(0x000000, 1.0);
 	this.renderer.clear();
 
 	//mouse button isn't down
@@ -275,32 +275,21 @@ Main.prototype.readGames = function(gameFile){
 
 
 
-/*var $loading = $('<div></div>')
+var $loading = $('<div></div>')
+               .html('<center><i style="text-size: 64;"><b>Loading in Games</b></i><br><br>0/11829</center>')
                .dialog({
                 	title: "Loading",
     				autoOpen: false,
-    				dialogClass: 'dialog_fixed,ui-widget-header',
+    				dialogClass: 'no-close',
     				modal: true,
-    				height: 500,
-    				width: 800,
-    				minWidth: 400,
-    				minHeight: 400,
-    				draggable:true,
-    				progress:true,
-    				close: function () { $(this).remove(); },
+    				height: 150,
+    				width: 400,
+    				draggable: false,
                });
-
-
-
-
+    $(".ui-dialog-titlebar-close").remove();
+    
+	$loading.dialog('open');
 	
-	$loading.dialog('open');*/
-
-
-
-
-
-
 
 
 
@@ -368,9 +357,13 @@ Main.prototype.readGames = function(gameFile){
 			
 
 			that.gamesLoaded++;
-			//$loading.progressbar(that.gamesLoaded);
+			var s ='<center><i style="text-size: 64;"><b>Loading in Games</b></i><br><br>' + that.gamesLoaded +'/11829</center>'
+			$loading.html(s);
 		}
 		console.log("Loaded " + that.gamesLoaded + " games");
+		if(that.gamesLoaded == 11829){
+			$loading.dialog('close');
+		}
 		
 	}
 
@@ -501,11 +494,16 @@ function showResponse(response) {
     				height: 500,
     				width: 800,
     				minWidth: 400,
-    				minHeight: 400,
+    				minHeight: 250,
+    				maxWidth: 1280,
+    				maxHeight: 720,
+    				resizable:true,
     				draggable:true,
     				close: function () { $(this).remove(); },
                });
     //$dialog.load(page);
+    //$(".ui-dialog-titlebar-close").append("x");;
+    $(".ui-dialog-titlebar-close").attr("style", "background-color:red; ");
 	$dialog.dialog('open');
 
 }
@@ -515,7 +513,7 @@ Main.prototype.googleApiClientReady = function() {
 
 }
 Main.prototype.searchYT = function(){
-	var q = "Let's Play " + game.selected.gameTitle;
+	var q = "Let's Play " + game.selected.gameTitle + " " +game.selected.platform;
   	var request = gapi.client.youtube.search.list({
     	q: q,
     	part: 'id',
@@ -542,11 +540,15 @@ Main.prototype.searchGamenet = function(){
     				height: 500,
     				width: 800,
     				minWidth: 400,
-    				minHeight: 400,
+    				minHeight: 250,
+    				maxWidth: 1280,
+    				maxHeight: 720,
+    				resizable:true,
     				draggable:true,
     				close: function () { $(this).remove(); },
                });
     //$dialog.load(page);
+    $(".ui-dialog-titlebar-close").attr("style", "background-color:red;");
 	$dialog4.dialog('open');
 }
 
@@ -570,11 +572,15 @@ Main.prototype.openWiki = function(){
     				height: 500,
     				width: 800,
     				minWidth: 400,
-    				minHeight: 400,
+    				minHeight: 250,
+    				maxWidth: 1280,
+    				maxHeight: 720,
+    				resizable:true,
     				draggable:true,
     				close: function () { $(this).remove(); },
                });
     //$dialog.load(page);
+    $(".ui-dialog-titlebar-close").attr("style", "background-color:red;");
 	$dialog2.dialog('open');
 }
 
@@ -595,7 +601,7 @@ Main.prototype.OnLoad = function(){
         imageSearch.setSearchCompleteCallback(this, searchComplete, null);
 
 
-        imageSearch.execute(game.selected.gameTitle);
+        imageSearch.execute(game.selected.gameTitle + " " + game.selected.platform);
       
 
 }
@@ -606,7 +612,7 @@ function searchComplete(){
         for (var i = 0; i < 5 || i<results.length; i++) {
             // For each result write it's title and image to the screen
             var result = results[i];
-            if(result == undefined){}
+            if(result == null){}
             else{
             	imagesHTML+="<img style='width:600px; height:auto; margin:0 100' src=' " + result.url + " ' >";
         	}
@@ -622,11 +628,15 @@ function searchComplete(){
     				height: 500,
     				width: 800,
     				minWidth: 400,
-    				minHeight: 400,
+    				minHeight: 250,
+    				maxWidth: 1280,
+    				maxHeight: 720,
+    				resizable:true,
     				draggable:true,
     				close: function () { $(this).remove(); },
                });
         $dialog3.append(imagesHTML);
+        $(".ui-dialog-titlebar-close").attr("style", "background-color:red; ");
         $dialog3.dialog('open');
     }
 }
