@@ -529,7 +529,6 @@ Main.prototype.searchYT = function(){
 
 
 Main.prototype.searchGamenet = function(){
-	console.log("Sweg");
 	var id = this.selected.id;
 	var that = this;
 
