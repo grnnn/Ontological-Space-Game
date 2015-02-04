@@ -356,12 +356,13 @@ var $loading = $('<div></div>')
 	var wikiTexLoaded = false;
 	var picTexLoaded = false;
 	var utubeTexLoaded = false;
+	var gNetLoaded = false;
 
 	var that = this;
 
 	this.wikiTex = THREE.ImageUtils.loadTexture("media/wiki_logo.png", undefined, function(){
 		wikiTexLoaded = true;
-		if(wikiTexLoaded && picTexLoaded && utubeTexLoaded){
+		if(wikiTexLoaded && picTexLoaded && utubeTexLoaded && gNetLoaded){
 			that.texturesLoaded = true;
 		}
 	}, function(){
@@ -370,7 +371,7 @@ var $loading = $('<div></div>')
 
 	this.utubeTex = THREE.ImageUtils.loadTexture("media/youtube_logo.png", undefined, function(){
 		picTexLoaded = true;
-		if(wikiTexLoaded && picTexLoaded && utubeTexLoaded){
+		if(wikiTexLoaded && picTexLoaded && utubeTexLoaded && gNetLoaded){
 			that.texturesLoaded = true;
 		}
 	}, function(){
@@ -379,11 +380,20 @@ var $loading = $('<div></div>')
 
 	this.picTex = THREE.ImageUtils.loadTexture("media/Camera_icon.png", undefined, function(){
 		utubeTexLoaded = true;
-		if(wikiTexLoaded && picTexLoaded && utubeTexLoaded){
+		if(wikiTexLoaded && picTexLoaded && utubeTexLoaded && gNetLoaded){
 			that.texturesLoaded = true;
 		}
 	}, function(){
 		alert("Picture Texture failed to load");
+	});
+
+	this.gNetTex = THREE.ImageUtils.loadTexture("media/gameNet-logo.png", undefined, function(){
+		gNetLoaded = true;
+		if(wikiTexLoaded && picTexLoaded && utubeTexLoaded && gNetLoaded){
+			that.texturesLoaded = true;
+		}
+	}, function(){
+		alert("Gamenet Texture failed to load");
 	});
 
 
@@ -399,7 +409,7 @@ var $loading = $('<div></div>')
 		new THREE.MeshPhongMaterial( { map: this.picTex } ) );
 	this.q4 = new THREE.Mesh(
 		new THREE.SphereGeometry(53, 7, 7, 3*Math.PI/2, Math.PI/2, 0, Math.PI),
-		new THREE.MeshPhongMaterial( {color: 0xffffff} ) );
+		new THREE.MeshPhongMaterial( {map: this.gNetTex} ) );
 
 	this.scene.add(this.q1);
 	this.scene.add(this.q2);
