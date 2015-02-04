@@ -145,22 +145,6 @@ Main.prototype.init = function(){
 				var intersections = raycaster.intersectObjects(that.gameSquares);
 
 				if(intersections[0] !== undefined){
-					$("#unselect").attr("style", "background-color:#000000;position:absolute");
-					if(that.squareHash[intersections[0].object.id] !== that.selected && intersections[0].object.funk == undefined){
-						if(that.selected != null) that.selected.unSelect();
-						that.selected = that.squareHash[intersections[0].object.id];
-						that.hasRightPressed = false;
-						that.startVector = new THREE.Vector3(that.selected.x + 500, that.selected.y, that.selected.z);
-						that.q1.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-						that.q2.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-						that.q3.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-						that.q4.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-						that.q1.material.visible = true;
-						that.q2.material.visible = true;
-						that.q3.material.visible = true;
-						that.q4.material.visible = true;
-						$("#gameTitleP").html("<b><center>" + that.selected.gameTitle + "<br>" + that.selected.year + "</center></b>");
-					}
 					
 					if(intersections[0].object.funk === "wiki"){
 						that.openWiki();
@@ -176,6 +160,30 @@ Main.prototype.init = function(){
 					}
 					
 
+				}
+
+				raycaster = new THREE.Raycaster();
+				raycaster.far = 5000;
+				raycaster.params.PointCloud.threshold = 50;
+				raycaster.ray.set(that.camera.position, that.rayVector);
+				intersections = raycaster.intersectObjects([that.particles]);
+
+				var point = (intersections[0] !== undefined) ? intersections[0] : null;
+				if(point !== null){
+					$("#unselect").attr("style", "background-color:#000000;position:absolute");
+					var id = that.findGameID(point.point);
+					that.selected = that.squareHash[id];
+					that.hasRightPressed = false;
+					that.startVector = new THREE.Vector3(that.selected.x + 500, that.selected.y, that.selected.z);
+					that.q1.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+					that.q2.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+					that.q3.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+					that.q4.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+					that.q1.material.visible = true;
+					that.q2.material.visible = true;
+					that.q3.material.visible = true;
+					that.q4.material.visible = true;
+					$("#gameTitleP").html("<b><center>" + that.selected.gameTitle + "<br>" + that.selected.year + "</center></b>");
 				}
 			}
 
@@ -210,7 +218,6 @@ Main.prototype.init = function(){
 		else if (e.which == "109"){
 			that.searchGamenet();
 		}
-		console.log(e.which);
 	});
 
 }
@@ -265,7 +272,17 @@ Main.prototype.update = function(){
 			
 		}
 		
-		
+		/*var that = this;
+		this.rayVector.set((this.mousePos.x/window.innerWidth) * 2 - 1, -(that.mousePos.y/window.innerHeight) * 2 + 1, 0.5).unproject(that.camera);
+		this.rayVector.sub(that.camera.position).normalize();
+		var raycaster = new THREE.Raycaster();
+
+		raycaster.far = 60000;
+		raycaster.ray.set(that.camera.position, that.rayVector);
+		var intersections = raycaster.intersectObjects([that.particles]);
+
+		var point = (intersections[0] !== undefined) ? intersections[0] : null;
+		console.log(point);*/
 			
 		
 		//render on update
@@ -325,6 +342,24 @@ Main.prototype.pushPan = function(pushX, pushY){
 	this.camera.translateX(pushX);
 	this.camera.translateY(pushY);
 }
+
+//Find game, given a vector of its position
+Main.prototype.findGameID = function(v){
+
+	var games = this.particles.geometry.vertices;
+	for(var i = 0; i < games.length; i++){
+		var g = games[i];
+
+		if(g.distanceTo(v) < 50){
+			return g.id;
+		}
+	}
+	alert("game not found");
+	return -1;
+
+
+}
+
 
 //Read in the json for games and create a bunch of objects for those games
 Main.prototype.readGames = function(gameFile){
@@ -396,6 +431,12 @@ var $loading = $('<div></div>')
 		alert("Gamenet Texture failed to load");
 	});
 
+	this.circleSprite = THREE.ImageUtils.loadTexture("media/sphere.png", undefined, function(){
+		console.log("sphere texture loaded")
+	}, function(){
+		alert("Sphere texture failed to load");
+	});
+
 
 	//Set up quarter meshes
 	this.q1 = new THREE.Mesh(
@@ -426,6 +467,10 @@ var $loading = $('<div></div>')
 	this.gameSquares.push(this.q3);
 	this.gameSquares.push(this.q4);
 
+	this.cloudMaterial = new THREE.PointCloudMaterial( {size: 250, map: this.circleSprite, transparent: true, blending: THREE.AdditiveBlending,  depthWrite: false});
+
+	this.points = new THREE.Geometry();
+
 	function load(data){
 
 
@@ -433,14 +478,20 @@ var $loading = $('<div></div>')
 			//set up physical game object
 			var myGame = data[i];
 
-			var obj = new GameObject(myGame.id, myGame.coords[0]*60000, myGame.coords[1]*60000, myGame.coords[2]*60000, myGame.title, myGame["wiki_url"], myGame.platform, myGame.year, that.scene);
+			var obj = new GameObject(myGame.id, myGame.coords[0]*60000, myGame.coords[1]*60000, myGame.coords[2]*60000, myGame.title, myGame["wiki_url"], myGame.platform, myGame.year);
+
+			var vert = new THREE.Vector3(myGame.coords[0]*60000, myGame.coords[1]*60000, myGame.coords[2]*60000);
+			vert.id = obj.id;
+			that.squareHash[obj.id] = obj;
+
+			that.points.vertices.push(vert);
 
 			//set an arbitrary identifier for hashing, make it the wiki link, since that's already unique and garaunteed
-			obj.main.id = obj.id;
+			//obj.main.id = obj.id;
 
 			//add mesh to gameSquares and add mesh to hash
-			that.gameSquares.push(obj.main);
-			that.squareHash[obj.main.id] = obj;
+			//that.gameSquares.push(obj.main);
+			//that.squareHash[obj.main.id] = obj;
 
 
 			//set first obj to selected
@@ -526,6 +577,9 @@ var $loading = $('<div></div>')
 			$.getJSON("res/games12.json", load).fail(function(){
 				console.log("JSON loading failed");
 			});
+
+			that.particles = new THREE.PointCloud(that.points, that.cloudMaterial);
+			that.scene.add(that.particles);
 		} else {
 			window.setTimeout(asyncLoad3, 1000);
 		}
