@@ -159,6 +159,7 @@ Main.prototype.init = function(){
 						that.q2.material.visible = true;
 						that.q3.material.visible = true;
 						that.q4.material.visible = true;
+						$("#gameTitleP").html("<b><center>" + that.selected.gameTitle + "<br>" + that.selected.year + "</center></b>");
 					}
 					
 					if(intersections[0].object.funk === "wiki"){
@@ -439,6 +440,7 @@ var $loading = $('<div></div>')
 				that.q2.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
 				that.q3.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
 				that.q4.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+				$("#gameTitleP").html("<b><center>" + that.selected.gameTitle + "<br>" + that.selected.year + "</center></b>");
 			}
 			
 
@@ -534,6 +536,7 @@ $("#unselect").on("click", function(){
 		game.q4.material.visible = false;
 		game.selected = null;
 		$(this).attr("style", "display: none;");
+		$("#gameTitleP").text(" ");
 	}
 
 });
