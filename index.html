@@ -23,7 +23,7 @@
   		<script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
 		<script src="lib/client.js"></script>
 		<script src="lib/TrackballControls.js"></script>
-		<script src="lib/bootstrap.min.js"></script>
+		<script src="lib/bootstrap.js"></script>
 		
 		<link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
 		<link rel="stylesheet" href="lib/bootstrap.min.css">
@@ -36,6 +36,9 @@
 		<!--<input type="image" id="myimage" style="border:0 none;background-color:transparent;position:absolute" src="media/undo.png"/>-->
 		<p id="gameTitleP" style="position:absolute;top:20%;left:50%;transform:translate(-50%, -50%);" class="gameTitle"><b> </b></p>
 		<button type="button" id="unselect" class="btn btn-primary" style="background-color:#222222;position:absolute">Unselect</button>
+		
+
+		<!--Sourcing-->
 		<script src="src/game.js"></script>
 		<script src="src/main.js"></script>
 		<script src="https://www.google.com/jsapi"></script>
@@ -56,7 +59,7 @@
 			THREE.ImageUtils.crossOrigin = '';
 
 			//create main, intialize
-			game = new Main($(document).width() - 10, $(document).height() - 20, "res/games1.json");
+			game = new Main(window.innerWidth, window.innerHeight, "res/games1.json");
 			game.init();
 			//game.readyYTAPI();
 
@@ -71,6 +74,38 @@
 			gameUpdate();
 		});
 		</script>
+
+		<!-- Modal -->
+		<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		  <div class="modal-dialog" style="margin-top: 15%;">
+		    <div class="modal-content">
+		      <div class="modal-body">
+		        <p>Hello! Welcome to Game Space!</p>
+		        <p>Game Space is a 3D representation of 12000 video games from wikipedia. <br>
+		        	Each game is a sphere in the space. You can 'select' a game by left-clicking it.</p>
+		        <p>Navigation controls:
+		        	<li>Right click and drag to rotate</li>
+		        	<li>Left click and drag while unselected to pan</li>
+		        	<li>'W' key while unselected to move forward</li>
+		        	<li>'S' key while unselected to move backward</li>
+		        	<li>Hold 'shift' to speed up</li>
+		        	<li>Click on quarters of a selected sphere to open a variety of links about the game</li>
+		        </p>
+
+		        <p>Loading Game...</p>
+		        <div class="progress">
+				  <div class="progress-bar" role="progressbar" id="loadingProgress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+				    0%
+				  </div>
+				</div>
+
+		      </div>
+		      <div class="modal-footer">		      	
+		        <center><button type="button" class="btn btn-default" id="gLaunch" data-dismiss="modal" disabled>Launch Game</button></center>
+		      </div>
+		    </div>
+		  </div>
+		</div>
 
 
 	</body>

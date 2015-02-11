@@ -34,6 +34,11 @@ var Main = function(w, h, gameFile){
 
 	this.startId = 0; // starting game id
 
+	this.cameraVel = 0;
+
+	this.closedModal = false;
+	this.mouseUpCounter = 0;
+
 
 }
 
@@ -104,29 +109,32 @@ Main.prototype.init = function(){
 
 
 
+
 	//context menu and mouse event listenders
 	document.addEventListener("contextmenu", function(e){
 		e.preventDefault();
 	});
 	document.addEventListener("mousedown", function(e){
-		if(e.which == "1"){
-			//Keep track of what we're selecting
-			that.selectionLoc.x = that.mousePos.x;
-			that.selectionLoc.y = that.mousePos.y;
+		if(that.closedModal){
+			if(e.which == "1"){
+				//Keep track of what we're selecting
+				that.selectionLoc.x = that.mousePos.x;
+				that.selectionLoc.y = that.mousePos.y;
 
-			//keep track of panning
-			that.leftMouseDown = true;
-			that.leftLocation.x = that.mousePos.x;
-			that.leftLocation.y = that.mousePos.y;
-		}
+				//keep track of panning
+				that.leftMouseDown = true;
+				that.leftLocation.x = that.mousePos.x;
+				that.leftLocation.y = that.mousePos.y;
+			}
 
 
 
-		if(e.which == "3"){
-			that.hasRightPressed = true;
-			that.rightLocation.x = e.pageX;
-			that.rightLocation.y = e.pageY;
-			that.rightMouseDown = true;
+			if(e.which == "3"){
+				that.hasRightPressed = true;
+				that.rightLocation.x = e.pageX;
+				that.rightLocation.y = e.pageY;
+				that.rightMouseDown = true;
+			}
 		}
 	});
 	document.addEventListener("mousemove", function(e){
@@ -134,91 +142,142 @@ Main.prototype.init = function(){
 		that.mousePos.y = e.pageY;
 	});
 	document.addEventListener("mouseup", function(e){
-		if(e.which == "1"){
-			if(that.mousePos.distanceTo(that.selectionLoc) < 5){
-				that.rayVector.set((that.mousePos.x/window.innerWidth) * 2 - 1, -(that.mousePos.y/window.innerHeight) * 2 + 1, 0.5).unproject(that.camera);
-				that.rayVector.sub(that.camera.position).normalize();
+		if(that.closedModal){
+			if(e.which == "1"){
+				if(that.mousePos.distanceTo(that.selectionLoc) < 5){
+					that.rayVector.set((that.mousePos.x/window.innerWidth) * 2 - 1, -(that.mousePos.y/window.innerHeight) * 2 + 1, 0.5).unproject(that.camera);
+					that.rayVector.sub(that.camera.position).normalize();
 
-				var raycaster = new THREE.Raycaster();
-				raycaster.ray.set(that.camera.position, that.rayVector);
+					var raycaster = new THREE.Raycaster();
+					raycaster.ray.set(that.camera.position, that.rayVector);
 
-				var intersections = raycaster.intersectObjects(that.gameSquares);
+					var intersections = raycaster.intersectObjects(that.gameSquares);
 
-				if(intersections[0] !== undefined){
-					
-					if(intersections[0].object.funk === "wiki"){
-						that.openWiki();
-					}
-					else if(intersections[0].object.funk === "utube"){
-						that.googleApiClientReady();
-					}
-					else if(intersections[0].object.funk === "pix"){
-						that.searchImages();
-					}
-					else if(intersections[0].object.funk === "gamenet"){
-						that.searchGamenet();
-					}
-					
+					if(intersections[0] !== undefined){
+						
+						if(intersections[0].object.funk === "wiki"){
+							that.openWiki();
+						}
+						else if(intersections[0].object.funk === "utube"){
+							that.googleApiClientReady();
+						}
+						else if(intersections[0].object.funk === "pix"){
+							that.searchImages();
+						}
+						else if(intersections[0].object.funk === "gamenet"){
+							that.searchGamenet();
+						}
+						
 
+					}
+
+					raycaster = new THREE.Raycaster();
+					raycaster.far = 5000;
+					raycaster.params.PointCloud.threshold = 50;
+					raycaster.ray.set(that.camera.position, that.rayVector);
+					intersections = raycaster.intersectObjects([that.particles]);
+
+					var point = (intersections[0] !== undefined) ? intersections[0] : null;
+					if(point !== null){
+						$("#unselect").attr("style", "background-color:#000000;position:absolute");
+						var id = that.findGameID(point.point);
+						that.selected = that.squareHash[id];
+						that.hasRightPressed = false;
+						that.startVector = new THREE.Vector3(that.selected.x + 500, that.selected.y, that.selected.z);
+						that.q1.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+						that.q2.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+						that.q3.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+						that.q4.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+						that.q1.material.visible = true;
+						that.q2.material.visible = true;
+						that.q3.material.visible = true;
+						that.q4.material.visible = true;
+						$("#gameTitleP").html("<b><center>" + that.selected.gameTitle + "<br>" + that.selected.year + "</center></b>");
+					}
 				}
 
-				raycaster = new THREE.Raycaster();
-				raycaster.far = 5000;
-				raycaster.params.PointCloud.threshold = 50;
-				raycaster.ray.set(that.camera.position, that.rayVector);
-				intersections = raycaster.intersectObjects([that.particles]);
-
-				var point = (intersections[0] !== undefined) ? intersections[0] : null;
-				if(point !== null){
-					$("#unselect").attr("style", "background-color:#000000;position:absolute");
-					var id = that.findGameID(point.point);
-					that.selected = that.squareHash[id];
-					that.hasRightPressed = false;
-					that.startVector = new THREE.Vector3(that.selected.x + 500, that.selected.y, that.selected.z);
-					that.q1.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-					that.q2.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-					that.q3.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-					that.q4.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-					that.q1.material.visible = true;
-					that.q2.material.visible = true;
-					that.q3.material.visible = true;
-					that.q4.material.visible = true;
-					$("#gameTitleP").html("<b><center>" + that.selected.gameTitle + "<br>" + that.selected.year + "</center></b>");
-				}
+				//release panning
+				that.leftMouseDown = false;
 			}
-
-			//release panning
-			that.leftMouseDown = false;
-		}
-		if(e.which == "3"){
-			that.rightMouseDown = false;
-		}
+			if(e.which == "3"){
+				that.rightMouseDown = false;
+			}
+		} 
 	});
 	document.addEventListener("keypress", function(e){
-		if(e.which == "115"){
-			if(that.selected == null){
-				that.pushZoom(-50);
+		if(that.closedModal){
+			if (e.which == "106"){
+				that.googleApiClientReady();
 			}
-		}
-		else if (e.which == "119"){
-			
-			if(that.selected == null){
-				that.pushZoom(50);
+			else if (e.which == "107"){
+				that.openWiki();
 			}
-		}
-		else if (e.which == "106"){
-			that.googleApiClientReady();
-		}
-		else if (e.which == "107"){
-			that.openWiki();
-		}
-		else if (e.which == "108"){
-			that.searchImages();
-		}
-		else if (e.which == "109"){
-			that.searchGamenet();
+			else if (e.which == "108"){
+				that.searchImages();
+			}
+			else if (e.which == "109"){
+				that.searchGamenet();
+			}
 		}
 	});
+
+	document.addEventListener("keydown", function(e){
+		if(that.closedModal){
+			if(e.which == "87"){
+				if(that.selected == null){
+					that.cameraVel = 50;
+				}
+			}
+			else if (e.which == "83"){
+				if(that.selected == null){
+					that.cameraVel = -50;
+				}
+			}
+
+			if(e.which == "16"){
+				if(that.cameraVel == 50){
+					that.cameraVel = 100;
+				} else if(that.cameraVel == -50){
+					that.cameraVel = -100;
+				}
+			}
+		}
+	});
+
+	document.addEventListener("keyup", function(e){
+		if(that.closedModal){
+			if(e.which == "87"){
+				if(that.selected == null){
+					that.cameraVel = 0;
+				}
+			}
+			else if (e.which == "83"){
+				if(that.selected == null){
+					that.cameraVel = 0;
+				}
+			}
+
+			if(e.which == "16"){
+				if(that.cameraVel == 100){
+					that.cameraVel = 50;
+				} else if(that.cameraVel == -100){
+					that.cameraVel = -50;
+				}
+			}
+		}
+	});
+
+	document.addEventListener("resize", function(){
+
+		that.camera.aspect = (window.innerWidth/window.innerHeight);
+		that.camera.updateProjectionMatrix();
+
+		that.renderer.setSize( window.innerWidth, window.innerHeight);
+
+		that.width = window.innerWidth;
+		that.height = window.innerHeight;
+
+	}, false);
 
 }
 
@@ -272,24 +331,26 @@ Main.prototype.update = function(){
 			
 		}
 		
-		/*var that = this;
-		this.rayVector.set((this.mousePos.x/window.innerWidth) * 2 - 1, -(that.mousePos.y/window.innerHeight) * 2 + 1, 0.5).unproject(that.camera);
-		this.rayVector.sub(that.camera.position).normalize();
-		var raycaster = new THREE.Raycaster();
-
-		raycaster.far = 60000;
-		raycaster.ray.set(that.camera.position, that.rayVector);
-		var intersections = raycaster.intersectObjects([that.particles]);
-
-		var point = (intersections[0] !== undefined) ? intersections[0] : null;
-		console.log(point);*/
-			
+		this.cameraUpdate();
 		
 		//render on update
 		this.renderer.render(this.scene, this.camera);
 	}
 
 }
+
+Main.prototype.cameraUpdate = function(){
+	var cameraMovementVec = new THREE.Vector3(0, 0, -this.cameraVel);
+
+	cameraMovementVec.applyQuaternion( this.camera.quaternion );
+
+	var nextPos = new THREE.Vector3(cameraMovementVec.x + this.camera.position.x,
+								  cameraMovementVec.y + this.camera.position.y,
+								  cameraMovementVec.z + this.camera.position.z);
+
+	this.camera.position.set(nextPos.x, nextPos.y, nextPos.z);
+}
+
 
 //"push" rotate the camera around a specific position,
 // pushX -- x strength of push
@@ -367,7 +428,7 @@ Main.prototype.readGames = function(gameFile){
 
 
 
-var $loading = $('<div></div>')
+/*var $loading = $('<div></div>')
                .html('<center><i style="text-size: 64;"><b>Loading in Games</b></i><br><br>0/11829</center>')
                .dialog({
                 	title: "Loading",
@@ -380,8 +441,8 @@ var $loading = $('<div></div>')
                });
     $(".ui-dialog-titlebar-close").remove();
     
-	$loading.dialog('open');
-	
+	$loading.dialog('open');*/
+	$('#myModal').modal({backdrop: "static", keyboard: false});
 
 
 
@@ -506,12 +567,18 @@ var $loading = $('<div></div>')
 			
 
 			that.gamesLoaded++;
-			var s ='<center><i style="text-size: 64;"><b>Loading in Games</b></i><br><br>' + that.gamesLoaded +'/11829</center>'
-			$loading.html(s);
+			var $loadBar = $("#loadingProgress");
+			//console.log(Math.floor(that.gamesLoaded/120));
+			$loadBar.css('width', Math.floor(that.gamesLoaded/118) + "%");
+			$loadBar.attr("aria-valuenow", Math.floor(that.gamesLoaded/118));
+			$loadBar.html(Math.floor(that.gamesLoaded/118) + "%");
+			//var s ='<center><i style="text-size: 64;"><b>Loading in Games</b></i><br><br>' + that.gamesLoaded +'/11829</center>'
+			//$loading.html(s);
 		}
 		console.log("Loaded " + that.gamesLoaded + " games");
 		if(that.gamesLoaded == 11829){
-			$loading.dialog('close');
+			$("#gLaunch").removeAttr("disabled");
+			that.closedModal = true;
 		}
 		
 	}
