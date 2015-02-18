@@ -353,7 +353,7 @@ Main.prototype.update = function(){
 }
 
 Main.prototype.renderCloseText = function(){
-
+	
 }
 
 Main.prototype.cameraUpdate = function(){
