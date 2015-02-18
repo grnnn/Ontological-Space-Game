@@ -205,7 +205,7 @@ Main.prototype.init = function(){
 		} 
 	});
 	document.addEventListener("keypress", function(e){
-		if(that.closedModal){
+		/*if(that.closedModal){
 			if (e.which == "106"){
 				that.googleApiClientReady();
 			}
@@ -218,7 +218,7 @@ Main.prototype.init = function(){
 			else if (e.which == "109"){
 				that.searchGamenet();
 			}
-		}
+		}*/
 	});
 
 	document.addEventListener("keydown", function(e){
@@ -773,6 +773,23 @@ Main.prototype.searchGamenet = function(){
     //$dialog.load(page);
     $(".ui-dialog-titlebar-close").attr("style", "background-color:red;");
 	$dialog4.dialog('open');
+}
+Main.prototype.findGame = function(id){
+	$("#unselect").attr("style", "background-color:#000000;position:absolute");
+	var id = id;
+	var that = this;
+	that.selected = that.squareHash[id];
+	that.hasRightPressed = false;
+	that.startVector = new THREE.Vector3(that.selected.x + 500, that.selected.y, that.selected.z);
+	that.q1.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+	that.q2.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+	that.q3.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+	that.q4.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
+	that.q1.material.visible = true;
+	that.q2.material.visible = true;
+	that.q3.material.visible = true;
+	that.q4.material.visible = true;
+	$("#gameTitleP").html("<b><center>" + that.selected.gameTitle + "<br>" + that.selected.year + "</center></b>");
 }
 
 

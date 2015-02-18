@@ -6329,4 +6329,16 @@ button.close {
     display: none !important;
   }
 }
+::-webkit-input-placeholder {
+  text-align: left;
+  margin-left: 20px;
+}
+:-moz-placeholder {
+  text-align: left;
+  margin-left: 20px;
+}
+:-ms-input-placeholder {
+  text-align: left;
+  margin-left: 20px;
+}
 /*# sourceMappingURL=bootstrap.css.map */
