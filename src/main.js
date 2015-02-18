@@ -21,7 +21,7 @@ var Main = function(w, h, gameFile){
 	this.selectionLoc = new THREE.Vector2(0, 0);
 
 	this.gamesLoaded = 0; //tracks loaded games
-	this.targetGames = 4; //target for loaded games
+	this.neighborsLoaded = 0; //tracks neighboring games loaded
 
 	this.mousePos = new THREE.Vector2(0, 0); //2d vector tracking mouse position
 
@@ -38,6 +38,9 @@ var Main = function(w, h, gameFile){
 
 	this.closedModal = false;
 	this.mouseUpCounter = 0;
+
+	this.closePoints; //Point cloud for closest games
+	this.showClosest = false;
 
 
 }
@@ -180,6 +183,14 @@ Main.prototype.init = function(){
 					var point = (intersections[0] !== undefined) ? intersections[0] : null;
 					if(point !== null){
 						$("#unselect").attr("style", "background-color:#000000;position:absolute");
+						$("#closest").attr("style", "background-color:#222222; position:absolute; left: 79px;");
+						if(that.showClosest){
+							that.scene.remove(that.closePoints);
+							that.closePoints = undefined;
+
+							that.showClosest = false;
+							$("#closest").text("Highlight 5 closest games");
+						}
 						var id = that.findGameID(point.point);
 						that.selected = that.squareHash[id];
 						that.hasRightPressed = false;
@@ -332,10 +343,16 @@ Main.prototype.update = function(){
 		}
 		
 		this.cameraUpdate();
+
+		if(this.showClosest) this.renderCloseText();
 		
 		//render on update
 		this.renderer.render(this.scene, this.camera);
 	}
+
+}
+
+Main.prototype.renderCloseText = function(){
 
 }
 
@@ -426,22 +443,6 @@ Main.prototype.findGameID = function(v){
 Main.prototype.readGames = function(gameFile){
 
 
-
-
-/*var $loading = $('<div></div>')
-               .html('<center><i style="text-size: 64;"><b>Loading in Games</b></i><br><br>0/11829</center>')
-               .dialog({
-                	title: "Loading",
-    				autoOpen: false,
-    				dialogClass: 'no-close',
-    				modal: true,
-    				height: 150,
-    				width: 400,
-    				draggable: false,
-               });
-    $(".ui-dialog-titlebar-close").remove();
-    
-	$loading.dialog('open');*/
 	$('#myModal').modal({backdrop: "static", keyboard: false});
 
 
@@ -547,13 +548,6 @@ Main.prototype.readGames = function(gameFile){
 
 			that.points.vertices.push(vert);
 
-			//set an arbitrary identifier for hashing, make it the wiki link, since that's already unique and garaunteed
-			//obj.main.id = obj.id;
-
-			//add mesh to gameSquares and add mesh to hash
-			//that.gameSquares.push(obj.main);
-			//that.squareHash[obj.main.id] = obj;
-
 
 			//set first obj to selected
 			if(obj.id == that.startId){
@@ -569,17 +563,13 @@ Main.prototype.readGames = function(gameFile){
 			that.gamesLoaded++;
 			var $loadBar = $("#loadingProgress");
 			//console.log(Math.floor(that.gamesLoaded/120));
-			$loadBar.css('width', Math.floor(that.gamesLoaded/118) + "%");
-			$loadBar.attr("aria-valuenow", Math.floor(that.gamesLoaded/118));
-			$loadBar.html(Math.floor(that.gamesLoaded/118) + "%");
+			$loadBar.css('width', Math.floor(that.gamesLoaded/236) + "%");
+			$loadBar.attr("aria-valuenow", Math.floor(that.gamesLoaded/236));
+			$loadBar.html(Math.floor(that.gamesLoaded/236) + "%");
 			//var s ='<center><i style="text-size: 64;"><b>Loading in Games</b></i><br><br>' + that.gamesLoaded +'/11829</center>'
 			//$loading.html(s);
 		}
 		console.log("Loaded " + that.gamesLoaded + " games");
-		if(that.gamesLoaded == 11829){
-			$("#gLaunch").removeAttr("disabled");
-			that.closedModal = true;
-		}
 		
 	}
 
@@ -656,6 +646,134 @@ Main.prototype.readGames = function(gameFile){
 	asyncLoad2();
 	asyncLoad3();	
 
+
+	function loadNeighbors(data){
+
+		for(var i = 0; i < data.length; i++){
+			var game = data[i];
+
+			that.squareHash[game.id].setClosest(game.closest);
+			that.neighborsLoaded++;
+
+			var $loadBar = $("#loadingProgress");
+			$loadBar.css('width', 50 + Math.floor(that.neighborsLoaded/236) + "%");
+			$loadBar.attr("aria-valuenow", 50 + Math.floor(that.neighborsLoaded/236));
+			$loadBar.html(50 + Math.floor(that.neighborsLoaded/236) + "%");
+		}
+
+		if(that.gamesLoaded == 11829 && that.neighborsLoaded == 11829){
+			$("#gLaunch").removeAttr("disabled");
+			that.closedModal = true;
+		}
+	}
+
+	function asyncLoad4(){
+		if(that.gamesLoaded >= 11000){
+			$.getJSON("res/neighbors/gameneighbors1.json", loadNeighbors).fail(function(){
+				console.log("JSON loading failed");
+			});
+
+			$.getJSON("res/neighbors/gameneighbors2.json", loadNeighbors).fail(function(){
+				console.log("JSON loading failed");
+			});
+
+			$.getJSON("res/neighbors/gameneighbors3.json", loadNeighbors).fail(function(){
+				console.log("JSON loading failed");
+			});
+			
+		} else {
+			window.setTimeout(asyncLoad4, 1000);
+		}
+	}
+
+	function asyncLoad5(){
+		if(that.gamesLoaded >= 11000 && that.neighborsLoaded >= 3000){
+			$.getJSON("res/neighbors/gameneighbors4.json", loadNeighbors).fail(function(){
+				console.log("JSON loading failed");
+			});
+
+			$.getJSON("res/neighbors/gameneighbors5.json", loadNeighbors).fail(function(){
+				console.log("JSON loading failed");
+			});
+
+			$.getJSON("res/neighbors/gameneighbors6.json", loadNeighbors).fail(function(){
+				console.log("JSON loading failed");
+			});
+			
+		} else {
+			window.setTimeout(asyncLoad5, 1000);
+		}
+	}
+
+	function asyncLoad6(){
+		if(that.gamesLoaded >= 11000 && that.neighborsLoaded >= 6000){
+			$.getJSON("res/neighbors/gameneighbors7.json", loadNeighbors).fail(function(){
+				console.log("JSON loading failed");
+			});
+
+			$.getJSON("res/neighbors/gameneighbors8.json", loadNeighbors).fail(function(){
+				console.log("JSON loading failed");
+			});
+
+			$.getJSON("res/neighbors/gameneighbors9.json", loadNeighbors).fail(function(){
+				console.log("JSON loading failed");
+			});
+			
+		} else {
+			window.setTimeout(asyncLoad6, 1000);
+		}
+	}
+
+	function asyncLoad7(){
+		if(that.gamesLoaded >= 11000 && that.neighborsLoaded >= 9000){
+			$.getJSON("res/neighbors/gameneighbors10.json", loadNeighbors).fail(function(){
+				console.log("JSON loading failed");
+			});
+
+			$.getJSON("res/neighbors/gameneighbors11.json", loadNeighbors).fail(function(){
+				console.log("JSON loading failed");
+			});
+
+			$.getJSON("res/neighbors/gameneighbors12.json", loadNeighbors).fail(function(){
+				console.log("JSON loading failed");
+			});
+			
+		} else {
+			window.setTimeout(asyncLoad7, 1000);
+		}
+	}
+
+	asyncLoad4();
+	asyncLoad5();
+	asyncLoad6();
+	asyncLoad7();
+
+	$("#closest").on("click", function(){
+		if($(this).text() === "Highlight 5 closest games"){
+			var newCloudMaterial = new THREE.PointCloudMaterial( {size: 350, map: that.circleSprite, transparent: true, blending: THREE.AdditiveBlending,  depthWrite: false, color: 0x3176B2});
+
+			var newGeometry = new THREE.Geometry();
+
+			for(var i = 0; i < that.selected.closest.length; i++){
+				var vert = that.squareHash[ that.selected.closest[i] ].position;
+				newGeometry.vertices.push(vert.clone());
+			}
+
+			that.closePoints = new THREE.PointCloud(newGeometry, newCloudMaterial);
+			that.scene.add(that.closePoints);
+
+			that.showClosest = true;
+			$(this).text("Hide 5 closest games");
+		} else {
+
+			that.scene.remove(that.closePoints);
+			that.closePoints = undefined;
+
+			that.showClosest = false;
+			$(this).text("Highlight 5 closest games");
+		}
+	});
+
 }
 
 //Listener for deselecting objects
@@ -668,6 +786,7 @@ $("#unselect").on("click", function(){
 		game.selected = null;
 		$(this).attr("style", "display: none;");
 		$("#gameTitleP").text(" ");
+		$("#closest").attr("style", "display: none;");
 	}
 
 });

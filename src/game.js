@@ -9,5 +9,11 @@ var GameObject = function(id, x, y, z, title, wiki, platform, year){
 
 	this.gameTitle = title;
 	this.wiki = wiki;
+
+	this.closest = [];
 	
+}
+
+GameObject.prototype.setClosest = function(closest){
+	this.closest = closest;
 }

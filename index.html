@@ -37,6 +37,7 @@
 		<!--<input type="image" id="myimage" style="border:0 none;background-color:transparent;position:absolute" src="media/undo.png"/>-->
 		<p id="gameTitleP" style="position:absolute;top:20%;left:50%;transform:translate(-50%, -50%);" class="gameTitle"><b> </b></p>
 		<button type="button" id="unselect" class="btn btn-primary" style="background-color:#222222;position:absolute">Unselect</button>
+		<button type="button" id="closest" class="btn btn-primary" style="background-color:#222222; position:absolute; left: 79px;">Highlight 5 closest games</button>
 		
 
 		<!--Sourcing-->
@@ -76,17 +77,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 			$(function() {
                 $("#tags").autocomplete({
                     maxResults: 5,
@@ -117,25 +107,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 			gameUpdate();
 		});
 		</script>
@@ -144,52 +115,13 @@
 
 		<div class="searcher"><center>
 		    <input id="tags" type="text" placeholder="  Search" name="code" ,="" style="position:absolute;right:0%; width: 400px; height: 34px; border: 0; text-align:center; background: #EEEEEE; " class="ui-autocomplete-input" autocomplete="off">
-		    <script>
-		        //$SCRIPT_ROOT = "/gamenet";
-		        /*$(document).ready(function() {
-		            $(function() {
-		                $("#tags").autocomplete({
-		                    maxResults: 5,
-		                    source: function(request, response) {
-		                        var results = $.ui.autocomplete.filter(games_list, request.term);
-		                        response(results.slice(0, this.options.maxResults));
-		                    },
-		                    focus: function(event, ui) {
-		                        // prevent autocomplete from updating the textbox
-		                        event.preventDefault();
-		                        // manually update the textbox
-		                        $(this).val(ui.item.label);
-		                    },
-		                    select: function(event, ui) {
-		                        // prevent autocomplete from updating the textbox
-		                        event.preventDefault();
-		                        // manually update the textbox and hidden field
-		                        var selectedGameID = ui.item.id;
-		                        // generate a page for the selected game
-		                        window.location = '/gamenet/games/' + selectedGameID
-		                    }
-		                });
-		            });
-		        });*/
-		    </script>
+		    
 		    <script>
 		    $("input.submit").click(function(e){
 		        $.post( "/save", {name: $("input.name").val(), time: "2pm"});
 		    });
 		    </script>
 		</div>
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
