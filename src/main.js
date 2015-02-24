@@ -41,6 +41,7 @@ var Main = function(w, h, gameFile){
 
 	this.closePoints; //Point cloud for closest games
 	this.showClosest = false;
+	this.closeDivs = [];
 
 
 }
@@ -190,6 +191,12 @@ Main.prototype.init = function(){
 
 							that.showClosest = false;
 							$("#closest").text("Highlight 5 closest games");
+
+							for(var i = 0; i < that.closeDivs.length; i++){
+								that.closeDivs[i].remove();
+							}
+
+							that.closeDivs = [];
 						}
 						var id = that.findGameID(point.point);
 						that.selected = that.squareHash[id];
@@ -353,7 +360,43 @@ Main.prototype.update = function(){
 }
 
 Main.prototype.renderCloseText = function(){
-	
+
+	var that = this;
+
+	this.camera.updateMatrixWorld();
+
+	function toXYCoords (pos) {
+		var newPos = pos.clone()
+        var v = newPos.project(that.camera);
+        var percX = (v.x + 1) / 2;
+        var percY = (-v.y + 1) / 2;
+        var left = percX * window.innerWidth;
+        var top = percY * window.innerHeight;
+
+        return new THREE.Vector2(left, top);
+    }
+
+	for(var i = 0; i < this.closeDivs.length; i++){
+		var vert = this.squareHash[this.selected.closest[i]].position;
+
+		var div = this.closeDivs[i];
+
+		var newPos = toXYCoords(vert);
+
+		newPos.x = newPos.x - div.offsetWidth/2;
+		newPos.y = newPos.y - 70;
+
+		if(newPos.x  + div.offsetWidth/2 + 50 > window.innerWidth || newPos.x < 0 
+			|| newPos.y + div.offsetHeight/2 + 50 > window.innerHeight || newPos.y < 0 || 
+			newPos.distanceTo((new THREE.Vector2(window.innerWidth/2, window.innerHeight/2))) < 150 ){
+			div.style.display = "none";
+		} else {
+			div.style.display = "";
+		}
+
+		div.style.left = newPos.x + "px";
+		div.style.top = newPos.y + "px";
+	}
 }
 
 Main.prototype.cameraUpdate = function(){
@@ -663,7 +706,6 @@ Main.prototype.readGames = function(gameFile){
 
 		if(that.gamesLoaded == 11829 && that.neighborsLoaded == 11829){
 			$("#gLaunch").removeAttr("disabled");
-			that.closedModal = true;
 		}
 	}
 
@@ -750,13 +792,23 @@ Main.prototype.readGames = function(gameFile){
 
 	$("#closest").on("click", function(){
 		if($(this).text() === "Highlight 5 closest games"){
-			var newCloudMaterial = new THREE.PointCloudMaterial( {size: 350, map: that.circleSprite, transparent: true, blending: THREE.AdditiveBlending,  depthWrite: false, color: 0x3176B2});
+			var newCloudMaterial = new THREE.PointCloudMaterial( {size: 350, map: that.circleSprite, transparent: true, blending: THREE.AdditiveBlending,  depthWrite: false, color: 0xff0000});
 
 			var newGeometry = new THREE.Geometry();
 
 			for(var i = 0; i < that.selected.closest.length; i++){
-				var vert = that.squareHash[ that.selected.closest[i] ].position;
+				var obj = that.squareHash[ that.selected.closest[i] ];
+				var vert = obj.position;
 				newGeometry.vertices.push(vert.clone());
+
+				var text = document.createElement('div');
+				text.style.position = 'absolute';
+
+				text.innerHTML = "<b style='color: #ff0000;'><center>" + obj.gameTitle + "<br>" + obj.year + "</center></b>"
+
+				document.body.appendChild(text);
+				that.closeDivs.push(text);
+
 			}
 
 			that.closePoints = new THREE.PointCloud(newGeometry, newCloudMaterial);
@@ -764,14 +816,25 @@ Main.prototype.readGames = function(gameFile){
 
 			that.showClosest = true;
 			$(this).text("Hide 5 closest games");
+
 		} else {
 
 			that.scene.remove(that.closePoints);
 			that.closePoints = undefined;
 
+			for(var i = 0; i < that.closeDivs.length; i++){
+				that.closeDivs[i].remove();
+			}
+
+			that.closeDivs = [];
+
 			that.showClosest = false;
 			$(this).text("Highlight 5 closest games");
 		}
+	});
+
+	$("#gLaunch").on("click", function(){
+		that.closedModal = true;
 	});
 
 }
@@ -790,6 +853,7 @@ $("#unselect").on("click", function(){
 	}
 
 });
+
 
 
 
