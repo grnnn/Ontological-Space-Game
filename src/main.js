@@ -850,6 +850,19 @@ $("#unselect").on("click", function(){
 		$(this).attr("style", "display: none;");
 		$("#gameTitleP").text(" ");
 		$("#closest").attr("style", "display: none;");
+		if(game.showClosest){
+			game.scene.remove(game.closePoints);
+			game.closePoints = undefined;
+
+			for(var i = 0; i < game.closeDivs.length; i++){
+				game.closeDivs[i].remove();
+			}
+
+			game.closeDivs = [];
+
+			game.showClosest = false;
+			$("#closest").text("Highlight 5 closest games");
+		}
 	}
 
 });
