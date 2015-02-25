@@ -15,7 +15,20 @@
 		    user-select: none;
 		    cursor: default;
 		}
-		
+
+		.ui-autocomplete {
+			max-height: 150px;
+			overflow-y: auto;
+			overflow-x: hidden;
+		}
+
+		.navbar-center {
+			text-align: center;
+			float: none;
+			display: inline-block;
+			
+		}
+
 		 </style>
 
 		<script src="lib/three.js"></script>
@@ -25,7 +38,7 @@
 		<script src="lib/TrackballControls.js"></script>
 		<script src="lib/bootstrap.js"></script>
 		
-		<link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+		<link rel="stylesheet" href="lib/jquery-ui.css">
 		<link rel="stylesheet" href="lib/bootstrap.min.css">
 		<link rel="stylesheet" href="lib/bootstrap-theme.min.css">
 		<script type="application/javascript" src="res/gamesDataForAutocomplete.json" charset="utf-8"></script>
@@ -36,10 +49,25 @@
 
 		<!--<input type="image" id="myimage" style="border:0 none;background-color:transparent;position:absolute" src="media/undo.png"/>-->
 		<p id="gameTitleP" style="position:absolute;top:20%;left:50%;transform:translate(-50%, -50%);" class="gameTitle"><b> </b></p>
-		<nav class="navbar navbar-default navbar-fixed-top">
+		<nav class="navbar navbar-inverse navbar-fixed-top" >
 			<div class="container">
-				<button type="button" id="unselect" class="btn btn-primary" style="background-color:#222222;position:absolute">Unselect</button>
-				<button type="button" id="closest" class="btn btn-primary" style="background-color:#222222; position:absolute; left: 79px;">Highlight 5 closest games</button>
+				<button type="button" class="btn btn-default navbar-btn" id="unselect" style="margin-left: -230px;" ><b>Unselect</b></button>
+				<button type="button" class="btn btn-default navbar-btn" id="closest" ><b>Highlight 5 closest games</b></button>
+				<button type="button" class="btn btn-default navbar-btn" data-toggle="tooltip" data-html="true" data-placement="bottom" title="<b style='font-size:10px;'>Mouse: <br> right-click - rotate <br> left-click - select <br> <br> Keyboard: <br> w - move forward <br> s - move backward <br> arrow keys - rotate</b>"><b>Controls</b></button>
+
+				<el class="navbar-center navbar-text" style="float:none; margin-left: 20%; font-size: 20px;  margin-top: 0; margin-bottom: 5;"><b>Ontological Game Space</b></el>
+
+				<form class="navbar-form navbar-right" style="margin-right: -230px;">
+					<div class="searcher "><center>
+					    <input id="tags" type="text" placeholder="  Search" name="code" ,="" style=" width: 400px; height: 34px; border: 0; text-align:center; background: #EEEEEE; " class="ui-autocomplete-input" autocomplete="off">
+					    
+					    <script>
+					    $("input.submit").click(function(e){
+					        $.post( "/save", {name: $("input.name").val(), time: "2pm"});
+					    });
+					    </script>
+					</div>
+				</form>
 			</div>
 		</nav>
 
@@ -61,7 +89,7 @@
 		var game;
 		$(document).ready(function(){
 
-
+			$('[data-toggle="tooltip"]').tooltip();
 			//allow any origin
 			//<input type="image" id="myimage" style="height:200px;width:200px;border:0 none;background-color: transparent;"  src="media/undo.png"/>
 			THREE.ImageUtils.crossOrigin = '';
@@ -85,7 +113,7 @@
 
 			$(function() {
                 $("#tags").autocomplete({
-                    maxResults: 5,
+                    maxResults: 10,
                     source: function(request, response) {
                         var results = $.ui.autocomplete.filter(games_list, request.term);
                         response(results.slice(0, this.options.maxResults));
@@ -119,15 +147,7 @@
 
 
 
-		<div class="searcher"><center>
-		    <input id="tags" type="text" placeholder="  Search" name="code" ,="" style="position:absolute;right:0%; width: 400px; height: 34px; border: 0; text-align:center; background: #EEEEEE; " class="ui-autocomplete-input" autocomplete="off">
-		    
-		    <script>
-		    $("input.submit").click(function(e){
-		        $.post( "/save", {name: $("input.name").val(), time: "2pm"});
-		    });
-		    </script>
-		</div>
+		
 
 
 

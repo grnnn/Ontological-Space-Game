@@ -189,14 +189,14 @@ Main.prototype.init = function(){
 
 					var point = (intersections[0] !== undefined) ? intersections[0] : null;
 					if(point !== null){
-						$("#unselect").attr("style", "background-color:#000000;position:absolute");
-						$("#closest").attr("style", "background-color:#222222; position:absolute; left: 79px;");
+						$("#unselect").attr("style", "margin-left: -230px;");
+						$("#closest").attr("style", "");
 						if(that.showClosest){
 							that.scene.remove(that.closePoints);
 							that.closePoints = undefined;
 
 							that.showClosest = false;
-							$("#closest").text("Highlight 5 closest games");
+							$("#closest").html("<b>Highlight 5 closest games</b>");
 
 							for(var i = 0; i < that.closeDivs.length; i++){
 								that.closeDivs[i].remove();
@@ -450,9 +450,12 @@ Main.prototype.renderCloseText = function(){
 		newPos.x = newPos.x - div.offsetWidth/2;
 		newPos.y = newPos.y - 70;
 
+		var anotherVec = newPos.clone();
+		anotherVec.x = anotherVec.x + div.offsetWidth/2;
+
 		if(newPos.x  + div.offsetWidth/2 + 50 > window.innerWidth || newPos.x < 0 
 			|| newPos.y + div.offsetHeight/2 + 50 > window.innerHeight || newPos.y < 0 || 
-			newPos.distanceTo((new THREE.Vector2(window.innerWidth/2, window.innerHeight/2))) < 150 ){
+			anotherVec.distanceTo((new THREE.Vector2(window.innerWidth/2, window.innerHeight/2))) < 150 ){
 			div.style.display = "none";
 		} else {
 			div.style.display = "";
@@ -485,8 +488,6 @@ Main.prototype.pushRotateCamera = function(pushX, pushY, position, distance){
 	//apply the push number to the current angles
 	this.xAngle += pushX;
 	this.yAngle += pushY;
-	console.log(pushX);
-
 
 	//check so that we don't rotate behind the object
 	if(this.yAngle > -0.001) this.yAngle = -0.001;
@@ -883,7 +884,7 @@ Main.prototype.readGames = function(gameFile){
 			that.scene.add(that.closePoints);
 
 			that.showClosest = true;
-			$(this).text("Hide 5 closest games");
+			$(this).html("<b>Hide 5 closest games</b>");
 
 		} else {
 
@@ -897,7 +898,7 @@ Main.prototype.readGames = function(gameFile){
 			that.closeDivs = [];
 
 			that.showClosest = false;
-			$(this).text("Highlight 5 closest games");
+			$(this).html("<b>Highlight 5 closest games</b>");
 		}
 	});
 
@@ -929,7 +930,7 @@ $("#unselect").on("click", function(){
 			game.closeDivs = [];
 
 			game.showClosest = false;
-			$("#closest").text("Highlight 5 closest games");
+			$("#closest").html("<b>Highlight 5 closest games</b>");
 		}
 	}
 
@@ -1046,7 +1047,7 @@ Main.prototype.searchGamenet = function(){
 	$dialog4.dialog('open');
 }
 Main.prototype.findGame = function(id){
-	$("#unselect").attr("style", "background-color:#000000;position:absolute");
+	$("#unselect").attr("style", "margin-left: -230px;");
 	var id = id;
 	var that = this;
 	that.selected = that.squareHash[id];
