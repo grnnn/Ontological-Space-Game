@@ -18,6 +18,12 @@ var Main = function(w, h, gameFile){
 	this.leftMouseDown;
 	this.leftLocation = new THREE.Vector2(0, 0);
 
+
+	this.leftArrow = false;
+	this.rightArrow = false;
+	this.upArrow = false;
+	this.downArrow = false;
+
 	this.selectionLoc = new THREE.Vector2(0, 0);
 
 	this.gamesLoaded = 0; //tracks loaded games
@@ -259,6 +265,20 @@ Main.prototype.init = function(){
 					that.cameraVel = -100;
 				}
 			}
+			if(e.which == "37"){
+
+				that.leftArrow = true;
+
+			}
+			if(e.which == "38"){
+				that.upArrow = true;
+			}
+			if(e.which == "39"){
+				that.rightArrow = true;
+			}
+			if(e.which == "40"){
+				that.downArrow = true;
+			}
 		}
 	});
 
@@ -281,6 +301,18 @@ Main.prototype.init = function(){
 				} else if(that.cameraVel == -100){
 					that.cameraVel = -50;
 				}
+			}
+			if(e.which == "37"){
+				that.leftArrow = false;
+			}
+			if(e.which == "38"){
+				that.upArrow = false;
+			}
+			if(e.which == "39"){
+				that.rightArrow = false;
+			}
+			if(e.which == "40"){
+				that.downArrow = false;
 			}
 		}
 	});
@@ -347,7 +379,39 @@ Main.prototype.update = function(){
 
 			this.pushRotateCamera(xMovement, yMovement, pof, 50);
 			
+
 		}
+
+
+
+
+		//Do the same function but for arrows
+		//keyboard controls coming soon
+		if(this.selected == null && this.leftArrow || this.selected == null && this.rightArrow || this.selected == null && this.upArrow || this.selected == null && this.downArrow){
+
+			var xMovement = 0.0;
+			var yMovement = 0.0;
+			
+			if(this.leftArrow) xMovement = 0.01;
+			if(this.rightArrow) xMovement = -0.01;
+			if(this.upArrow) yMovement = -0.01;
+			if(this.downArrow) yMovement = 0.01;
+			var lookAtVec = new THREE.Vector3(0, 0, -50);
+			lookAtVec.applyQuaternion( this.camera.quaternion );
+			
+			var pof = new THREE.Vector3(lookAtVec.x + this.camera.position.x,
+								  lookAtVec.y + this.camera.position.y,
+								  lookAtVec.z + this.camera.position.z);
+			this.pushRotateCamera(xMovement, yMovement, pof, 50);
+
+			
+		}
+
+
+
+
+
+
 		
 		this.cameraUpdate();
 
@@ -421,6 +485,8 @@ Main.prototype.pushRotateCamera = function(pushX, pushY, position, distance){
 	//apply the push number to the current angles
 	this.xAngle += pushX;
 	this.yAngle += pushY;
+	console.log(pushX);
+
 
 	//check so that we don't rotate behind the object
 	if(this.yAngle > -0.001) this.yAngle = -0.001;
@@ -432,10 +498,12 @@ Main.prototype.pushRotateCamera = function(pushX, pushY, position, distance){
 	var offSetY = distance*Math.cos(this.yAngle);
 	var offSetZ = distance*Math.sin(this.yAngle)*Math.cos(this.xAngle);
 
+
 	//Offset coordinates are simply added to position to get camera coordinates
 	this.camera.position.x = position.x + offSetX;
 	this.camera.position.y = position.y + offSetY;
 	this.camera.position.z = position.z + offSetZ;
+
 
 	//Make a call to zoom to change camera
 	this.camera.lookAt(position);
@@ -861,6 +929,7 @@ $("#unselect").on("click", function(){
 
 
 
+
 //ALL YOUTUBE STUFF
 function handleAPILoaded(){
 	Main.prototype.handleAPILoaded2();
@@ -888,29 +957,35 @@ function onSearchResponse(response) {
 function showResponse(response) {
     YT = response;
 
-    var page = "http://www.youtube.com/embed/" + YT.items[0].id.videoId;
+    if(YT.items.length > 0){
 
-	var $dialog = $('<div></div>')
-               .html('<iframe style="border: 0px; " src="' + page + '" width="100%" height="100%"></iframe>')
-               .dialog({
-                	title: "Youtube 'Let's Play' Video",
-    				autoOpen: false,
-    				dialogClass: 'dialog_fixed,ui-widget-header',
-    				modal: false,
-    				height: 500,
-    				width: 800,
-    				minWidth: 400,
-    				minHeight: 250,
-    				maxWidth: 1280,
-    				maxHeight: 720,
-    				resizable:true,
-    				draggable:true,
-    				close: function () { $(this).remove(); },
-               });
-    //$dialog.load(page);
-    //$(".ui-dialog-titlebar-close").append("x");;
-    $(".ui-dialog-titlebar-close").attr("style", "background-color:red; ");
-	$dialog.dialog('open');
+	    var page = "http://www.youtube.com/embed/" + YT.items[0].id.videoId;
+
+		var $dialog = $('<div></div>')
+	               .html('<iframe style="border: 0px; " src="' + page + '" width="100%" height="100%"></iframe>')
+	               .dialog({
+	                	title: "Youtube 'Let's Play' Video",
+	    				autoOpen: false,
+	    				dialogClass: 'dialog_fixed,ui-widget-header',
+	    				modal: false,
+	    				height: 500,
+	    				width: 800,
+	    				minWidth: 400,
+	    				minHeight: 250,
+	    				maxWidth: 1280,
+	    				maxHeight: 720,
+	    				resizable:true,
+	    				draggable:true,
+	    				close: function () { $(this).remove(); },
+	               });
+	    //$dialog.load(page);
+	    //$(".ui-dialog-titlebar-close").append("x");;
+	    $(".ui-dialog-titlebar-close").attr("style", "background-color:red; ");
+		$dialog.dialog('open');
+	}else{
+		alert("No Youtube Videos Found For This Game");
+	}
+
 
 }
 Main.prototype.googleApiClientReady = function() {
