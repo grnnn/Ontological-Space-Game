@@ -78,7 +78,7 @@ Main.prototype.init = function(){
     } ();
 
     var path = QueryString.u;
-   
+
     if(path != undefined){
     	path = path.replace("/", "");
     	this.startId = parseInt(path);
@@ -164,7 +164,7 @@ Main.prototype.init = function(){
 					var intersections = raycaster.intersectObjects(that.gameSquares);
 
 					if(intersections[0] !== undefined){
-						
+
 						if(intersections[0].object.funk === "wiki"){
 							that.openWiki();
 						}
@@ -177,7 +177,7 @@ Main.prototype.init = function(){
 						else if(intersections[0].object.funk === "gamenet"){
 							that.searchGamenet();
 						}
-						
+
 
 					}
 
@@ -189,7 +189,7 @@ Main.prototype.init = function(){
 
 					var point = (intersections[0] !== undefined) ? intersections[0] : null;
 					if(point !== null){
-						$("#unselect").attr("style", "margin-left: -230px;");
+						$("#unselect").attr("style", "");
 						$("#closest").attr("style", "");
 						if(that.showClosest){
 							that.scene.remove(that.closePoints);
@@ -226,7 +226,7 @@ Main.prototype.init = function(){
 			if(e.which == "3"){
 				that.rightMouseDown = false;
 			}
-		} 
+		}
 	});
 	document.addEventListener("keypress", function(e){
 		/*if(that.closedModal){
@@ -349,7 +349,7 @@ Main.prototype.update = function(){
 			if(yMovement > 0.01) yMovement = 0.01;
 			if(yMovement < -0.01) yMovement = -0.01;
 			this.pushRotateCamera(xMovement, yMovement, this.selected.position, 500);
-			
+
 		}
 
 		if(this.leftMouseDown && this.selected == null){
@@ -372,13 +372,13 @@ Main.prototype.update = function(){
 			if(yMovement < -0.01) yMovement = -0.01;
 			var lookAtVec = new THREE.Vector3(0, 0, -50);
 			lookAtVec.applyQuaternion( this.camera.quaternion );
-			
+
 			var pof = new THREE.Vector3(lookAtVec.x + this.camera.position.x,
 								  lookAtVec.y + this.camera.position.y,
 								  lookAtVec.z + this.camera.position.z);
 
 			this.pushRotateCamera(xMovement, yMovement, pof, 50);
-			
+
 
 		}
 
@@ -391,20 +391,20 @@ Main.prototype.update = function(){
 
 			var xMovement = 0.0;
 			var yMovement = 0.0;
-			
+
 			if(this.leftArrow) xMovement = 0.01;
 			if(this.rightArrow) xMovement = -0.01;
 			if(this.upArrow) yMovement = -0.01;
 			if(this.downArrow) yMovement = 0.01;
 			var lookAtVec = new THREE.Vector3(0, 0, -50);
 			lookAtVec.applyQuaternion( this.camera.quaternion );
-			
+
 			var pof = new THREE.Vector3(lookAtVec.x + this.camera.position.x,
 								  lookAtVec.y + this.camera.position.y,
 								  lookAtVec.z + this.camera.position.z);
 			this.pushRotateCamera(xMovement, yMovement, pof, 50);
 
-			
+
 		}
 
 
@@ -412,11 +412,11 @@ Main.prototype.update = function(){
 
 
 
-		
+
 		this.cameraUpdate();
 
 		if(this.showClosest) this.renderCloseText();
-		
+
 		//render on update
 		this.renderer.render(this.scene, this.camera);
 	}
@@ -453,8 +453,8 @@ Main.prototype.renderCloseText = function(){
 		var anotherVec = newPos.clone();
 		anotherVec.x = anotherVec.x + div.offsetWidth/2;
 
-		if(newPos.x  + div.offsetWidth/2 + 50 > window.innerWidth || newPos.x < 0 
-			|| newPos.y + div.offsetHeight/2 + 50 > window.innerHeight || newPos.y < 0 || 
+		if(newPos.x  + div.offsetWidth/2 + 50 > window.innerWidth || newPos.x < 0
+			|| newPos.y + div.offsetHeight/2 + 50 > window.innerHeight || newPos.y < 0 ||
 			anotherVec.distanceTo((new THREE.Vector2(window.innerWidth/2, window.innerHeight/2))) < 150 ){
 			div.style.display = "none";
 		} else {
@@ -670,7 +670,7 @@ Main.prototype.readGames = function(gameFile){
 				that.q4.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
 				$("#gameTitleP").html("<b><center>" + that.selected.gameTitle + "<br>" + that.selected.year + "</center></b>");
 			}
-			
+
 
 			that.gamesLoaded++;
 			var $loadBar = $("#loadingProgress");
@@ -682,7 +682,7 @@ Main.prototype.readGames = function(gameFile){
 			//$loading.html(s);
 		}
 		console.log("Loaded " + that.gamesLoaded + " games");
-		
+
 	}
 
 	$.getJSON(gameFile, load).fail(function(){
@@ -756,7 +756,7 @@ Main.prototype.readGames = function(gameFile){
 
 	asyncLoad1();
 	asyncLoad2();
-	asyncLoad3();	
+	asyncLoad3();
 
 
 	function loadNeighbors(data){
@@ -791,7 +791,7 @@ Main.prototype.readGames = function(gameFile){
 			$.getJSON("res/neighbors/gameneighbors3.json", loadNeighbors).fail(function(){
 				console.log("JSON loading failed");
 			});
-			
+
 		} else {
 			window.setTimeout(asyncLoad4, 1000);
 		}
@@ -810,7 +810,7 @@ Main.prototype.readGames = function(gameFile){
 			$.getJSON("res/neighbors/gameneighbors6.json", loadNeighbors).fail(function(){
 				console.log("JSON loading failed");
 			});
-			
+
 		} else {
 			window.setTimeout(asyncLoad5, 1000);
 		}
@@ -829,7 +829,7 @@ Main.prototype.readGames = function(gameFile){
 			$.getJSON("res/neighbors/gameneighbors9.json", loadNeighbors).fail(function(){
 				console.log("JSON loading failed");
 			});
-			
+
 		} else {
 			window.setTimeout(asyncLoad6, 1000);
 		}
@@ -848,7 +848,7 @@ Main.prototype.readGames = function(gameFile){
 			$.getJSON("res/neighbors/gameneighbors12.json", loadNeighbors).fail(function(){
 				console.log("JSON loading failed");
 			});
-			
+
 		} else {
 			window.setTimeout(asyncLoad7, 1000);
 		}
@@ -966,7 +966,7 @@ Main.prototype.handleAPILoaded2 = function(){
 // Search for a specified string.
 function onSearchResponse(response) {
 	showResponse(response);
-  
+
 }
 function showResponse(response) {
     YT = response;
@@ -1047,7 +1047,7 @@ Main.prototype.searchGamenet = function(){
 	$dialog4.dialog('open');
 }
 Main.prototype.findGame = function(id){
-	$("#unselect").attr("style", "margin-left: -230px;");
+	$("#unselect").attr("style", "");
 	var id = id;
 	var that = this;
 	that.selected = that.squareHash[id];
@@ -1104,17 +1104,17 @@ Main.prototype.searchImages = function(){
 	google.load('search', '1', {"callback":Main.prototype.OnLoad});
 }
 Main.prototype.OnLoad = function(){
-		
+
         // Create an Image Search instance.
         imageSearch = new google.search.ImageSearch();
 
-        // Set searchComplete as the callback function when a search is 
+        // Set searchComplete as the callback function when a search is
         // complete.  The imageSearch object will have results in it.
         imageSearch.setSearchCompleteCallback(this, searchComplete, null);
 
 
         imageSearch.execute(game.selected.gameTitle + " " + game.selected.platform);
-      
+
 
 }
 function searchComplete(){
@@ -1128,7 +1128,7 @@ function searchComplete(){
             else{
             	imagesHTML+="<img style='width:600px; height:auto; margin:0 100' src=' " + result.url + " ' >";
         	}
-            
+
         }
         var $dialog3 = $('<div></div>')
                .html('<iframe style="border: 0px;" width="0px" height="0px"></iframe>')
