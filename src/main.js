@@ -49,7 +49,7 @@ var Main = function(w, h, gameFile){
 	this.showClosest = false;
 	this.closeDivs = [];
 
-
+	this.isAnimating = false; //Are we currently animating movement to a selection?
 }
 
 Main.prototype.init = function(){
@@ -81,7 +81,10 @@ Main.prototype.init = function(){
 
     if(path != undefined){
     	path = path.replace("/", "");
-    	this.startId = parseInt(path);
+			var newStart = parseInt(path);
+			if(typeof newStart === "number" && newStart > 0 && newStart < 11830){
+				this.startId = newStart;
+			}
     	console.log("Starting at ID: " + this.startId);
     }
 
@@ -125,7 +128,7 @@ Main.prototype.init = function(){
 		e.preventDefault();
 	});
 	document.addEventListener("mousedown", function(e){
-		if(that.closedModal){
+		if(that.closedModal && !that.isAnimating){
 			if(e.which == "1"){
 				//Keep track of what we're selecting
 				that.selectionLoc.x = that.mousePos.x;
@@ -152,9 +155,9 @@ Main.prototype.init = function(){
 		that.mousePos.y = e.pageY;
 	});
 	document.addEventListener("mouseup", function(e){
-		if(that.closedModal){
+		if(that.closedModal && !that.isAnimating){
 			if(e.which == "1"){
-				if(that.mousePos.distanceTo(that.selectionLoc) < 5){
+				if(that.mousePos.distanceTo(that.selectionLoc) < 5 && that.mousePos > 50){
 					that.rayVector.set((that.mousePos.x/window.innerWidth) * 2 - 1, -(that.mousePos.y/window.innerHeight) * 2 + 1, 0.5).unproject(that.camera);
 					that.rayVector.sub(that.camera.position).normalize();
 
@@ -163,7 +166,7 @@ Main.prototype.init = function(){
 
 					var intersections = raycaster.intersectObjects(that.gameSquares);
 
-					if(intersections[0] !== undefined){
+					if(intersections[0] !== undefined && that.selected !== null){
 
 						if(intersections[0].object.funk === "wiki"){
 							that.openWiki();
@@ -189,8 +192,8 @@ Main.prototype.init = function(){
 
 					var point = (intersections[0] !== undefined) ? intersections[0] : null;
 					if(point !== null){
-						$("#unselect").attr("style", "");
-						$("#closest").attr("style", "");
+						$("#unselect").removeAttr("disabled");
+						$("#closest").removeAttr("disabled");
 						if(that.showClosest){
 							that.scene.remove(that.closePoints);
 							that.closePoints = undefined;
@@ -246,7 +249,7 @@ Main.prototype.init = function(){
 	});
 
 	document.addEventListener("keydown", function(e){
-		if(that.closedModal){
+		if(that.closedModal && !that.isAnimating){
 			if(e.which == "87"){
 				if(that.selected == null){
 					that.cameraVel = 50;
@@ -283,7 +286,7 @@ Main.prototype.init = function(){
 	});
 
 	document.addEventListener("keyup", function(e){
-		if(that.closedModal){
+		if(that.closedModal && !that.isAnimating){
 			if(e.which == "87"){
 				if(that.selected == null){
 					that.cameraVel = 0;
@@ -334,7 +337,7 @@ Main.prototype.init = function(){
 Main.prototype.update = function(){
 	if(this.gamesLoaded > 11000){
 		//rotate around the selected object on update, only if the right mouse button hasn't been clicked for that object
-		if(!this.hasRightPressed && this.selected !== null){
+		if(!this.hasRightPressed && this.selected !== null && !this.isAnimating){
 			this.pushRotateCamera(0.001, 0, this.selected.position, 500);
 		}
 
@@ -408,7 +411,15 @@ Main.prototype.update = function(){
 		}
 
 
+		if(this.isAnimating){
+			//First we need to start rotating the camera toward the selected object
+			var inFrontOfCamera = new THREE.Vector3(0, 0, -1);
+			inFrontOfCamera = inFrontOfCamera.ApplyQuaternion( this.camera.quaternion );
 
+			/*var towardSelected = new THREE.Vector3(this.camera.position.x - this.
+
+			)*/
+		}
 
 
 
@@ -916,9 +927,9 @@ $("#unselect").on("click", function(){
 		game.q3.material.visible = false;
 		game.q4.material.visible = false;
 		game.selected = null;
-		$(this).attr("style", "display: none;");
+		$(this).attr("disabled", "disabled");
 		$("#gameTitleP").text(" ");
-		$("#closest").attr("style", "display: none;");
+		$("#closest").attr("disabled", "disabled");
 		if(game.showClosest){
 			game.scene.remove(game.closePoints);
 			game.closePoints = undefined;
