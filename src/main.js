@@ -50,6 +50,9 @@ var Main = function(w, h, gameFile){
 	this.closeDivs = [];
 
 	this.isAnimating = false; //Are we currently animating movement to a selection?
+	this.xAng = true;
+	this.yAng = true;
+	this.fTrg = true;
 }
 
 Main.prototype.init = function(){
@@ -157,7 +160,7 @@ Main.prototype.init = function(){
 	document.addEventListener("mouseup", function(e){
 		if(that.closedModal && !that.isAnimating){
 			if(e.which == "1"){
-				if(that.mousePos.distanceTo(that.selectionLoc) < 5 && that.mousePos > 50){
+				if(that.mousePos.distanceTo(that.selectionLoc) < 5 && that.mousePos.y > 50){
 					that.rayVector.set((that.mousePos.x/window.innerWidth) * 2 - 1, -(that.mousePos.y/window.innerHeight) * 2 + 1, 0.5).unproject(that.camera);
 					that.rayVector.sub(that.camera.position).normalize();
 
@@ -220,6 +223,8 @@ Main.prototype.init = function(){
 						that.q3.material.visible = true;
 						that.q4.material.visible = true;
 						$("#gameTitleP").html("<b><center>" + that.selected.gameTitle + "<br>" + that.selected.year + "</center></b>");
+						$("#gameTitleP").attr("style", "display: none;");
+						that.isAnimating = true;
 					}
 				}
 
@@ -412,13 +417,7 @@ Main.prototype.update = function(){
 
 
 		if(this.isAnimating){
-			//First we need to start rotating the camera toward the selected object
-			var inFrontOfCamera = new THREE.Vector3(0, 0, -1);
-			inFrontOfCamera = inFrontOfCamera.ApplyQuaternion( this.camera.quaternion );
-
-			/*var towardSelected = new THREE.Vector3(this.camera.position.x - this.
-
-			)*/
+			this.animating();
 		}
 
 
@@ -432,6 +431,78 @@ Main.prototype.update = function(){
 		this.renderer.render(this.scene, this.camera);
 	}
 
+}
+
+Main.prototype.animating = function(){
+	//
+	//First we need to start rotating the camera toward the selected object
+	//
+
+	//Get camera view vector
+	var inFrontOfCamera = new THREE.Vector3(0, 0, -1);
+	inFrontOfCamera = inFrontOfCamera.applyQuaternion( this.camera.quaternion );
+
+	//Get vector toward selected object
+	var towardSelected = new THREE.Vector3(this.selected.position.x - this.camera.position.x,
+																				this.selected.position.y - this.camera.position.y,
+																				this.selected.position.z - this.camera.position.z);
+	var towardSelected = towardSelected.normalize();
+
+	//Get x-z angle of inFrontOfCamera
+	var camAngle = Math.atan2(inFrontOfCamera.x, inFrontOfCamera.z);
+	//Get x-z angle of towardSelected
+	var selAngle = Math.atan2(towardSelected.x, towardSelected.z);
+	//Get difference between angles
+	var diffAngle = camAngle - selAngle;
+
+	var xdir = (diffAngle < 0) ? 1 : -1;
+
+	if(Math.abs(diffAngle) < 0.05 ) {
+		xdir = 0;
+	}
+
+	//Get y difference
+	var vDiff = towardSelected.y - inFrontOfCamera.y;
+
+	var ydir = (vDiff < 0) ? 1 : -1;
+
+	if(Math.abs(vDiff) < 0.05 ) {
+		ydir = 0;
+	}
+
+	if(this.fTrg){
+		this.fTrg = false;
+		this.xAng = diffAngle;
+		this.yAng = vDiff;
+	}
+
+	//Get point of focus now...
+	var lookAtVec = new THREE.Vector3(0, 0, -50);
+	lookAtVec.applyQuaternion( this.camera.quaternion );
+	var pof = new THREE.Vector3(lookAtVec.x + this.camera.position.x,
+							lookAtVec.y + this.camera.position.y,
+							lookAtVec.z + this.camera.position.z);
+
+	//Do the actual rotation, should always take a short amount of time
+	this.pushRotateCamera(  (Math.abs(this.xAng)/30) * xdir,  (Math.abs(this.yAng)/15) * ydir, pof, 50);
+
+	//
+	//Now move on to pushing the camera forward (along the path of towardSelected)
+	//
+	var nextPos = towardSelected.multiplyScalar(50);
+
+	//Clamp the camera movement
+	if(this.camera.position.distanceTo(this.selected.position) > 500) {
+		this.camera.position.x += nextPos.x;
+		this.camera.position.y += nextPos.y;
+		this.camera.position.z += nextPos.z;
+	} else
+
+	//Exit thingy if both thingies happen
+	if(this.camera.position.distanceTo(this.selected.position) < 500 && Math.abs(vDiff) < 0.05 && Math.abs(diffAngle) < 0.05){
+		this.isAnimating = false;
+		$("#gameTitleP").attr("style", "");
+	}
 }
 
 Main.prototype.renderCloseText = function(){
