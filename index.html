@@ -45,7 +45,6 @@
 		<link rel="stylesheet" href="lib/jquery-ui.css">
 		<link rel="stylesheet" href="lib/bootstrap.min.css">
 		<link rel="stylesheet" href="lib/bootstrap-theme.min.css">
-		<script type="application/javascript" src="res/gamesDataForAutocomplete.json" charset="utf-8"></script>
 
 	</head>
 
@@ -55,21 +54,19 @@
 		<p id="gameTitleP" style="" class="gameTitle"><b> </b></p>
 		<nav class="navbar navbar-inverse navbar-fixed-top" >
 
-
-
 			<div class="container">
 
 				<div class="btn-group" role="group">
 					<button type="button" class="btn btn-default navbar-btn" id="unselect" ><b>Unselect</b></button>
-					<button type="button" class="btn btn-default navbar-btn" id="closest" ><b>Highlight 5 closest games</b></button>
+					<button type="button" class="btn btn-default navbar-btn" id="closest" ><b>Toggle 5 closest games</b></button>
 					<button type="button" class="btn btn-default navbar-btn" data-toggle="tooltip" data-html="true" data-placement="bottom" title="<b style='font-size:10px;'>Mouse: <br> right-click - rotate <br> left-click - select <br> <br> Keyboard: <br> w - move forward <br> s - move backward <br> arrow keys - rotate</b>"><b>Controls</b></button>
 				</div>
 
-				<el class="navbar-text" style="float:none; font-size: 20px; margin-left: 5%; margin-top: 0; margin-bottom: 5;"><b>Ontological Game Space</b></el>
+				<el class="navbar-text" style="position:absolute; font-size: 20px; margin-top: 10px; text-align: center; left: 0; right: 0; width: 300px; margin: auto; margin-top: 10px;"><b>Ontological Game Space</b></el>
 
 				<form class="navbar-form navbar-right" >
 					<div class="searcher "><center>
-					    <input id="tags" type="text" placeholder="  Search" name="code" ,="" style=" width: 400px; height: 34px; border: 0; text-align:center; background: #EEEEEE; " class="ui-autocomplete-input" autocomplete="off">
+					    <input id="tags" type="text" placeholder="  Search" name="code" ,="" style=" width: 350px; height: 34px; border: 0; text-align:center; background: #EEEEEE; " class="ui-autocomplete-input" autocomplete="off">
 
 					    <script>
 					    $("input.submit").click(function(e){
@@ -87,6 +84,7 @@
 		<!--Sourcing-->
 		<script src="src/game.js"></script>
 		<script src="src/main.js"></script>
+		<script src="src/gamesDataForAutocomplete.js"></script>
 		<script src="https://www.google.com/jsapi"></script>
 		<script src="https://apis.google.com/js/client:plusone.js"></script>
 
@@ -141,6 +139,20 @@
                         var selectedGameID = ui.item.id;
                         game.findGame(selectedGameID);
                         $(this).val("");
+												if(game.showClosest){
+													game.scene.remove(game.closePoints);
+													game.closePoints = undefined;
+
+													game.showClosest = false;
+
+													for(var i = 0; i < game.closeDivs.length; i++){
+														game.closeDivs[i].remove();
+													}
+
+													game.closeDivs = [];
+												}
+												game.isAnimating = true;
+												$("#gameTitleP").attr("style", "display: none;");
                     }
 		        });
 		    });

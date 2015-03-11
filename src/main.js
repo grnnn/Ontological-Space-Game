@@ -3,7 +3,7 @@ var Main = function(w, h, gameFile){
 	this.height = h; //height of screen
 	this.gameFile = gameFile; //file where games are located
 
-	this.camera = new THREE.PerspectiveCamera(45, w/h, 1, 100000);
+	this.camera = new THREE.PerspectiveCamera(45, w/h, 1, 30000000);
 	this.renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
 	this.scene = new THREE.Scene();
 
@@ -53,6 +53,9 @@ var Main = function(w, h, gameFile){
 	this.xAng = true;
 	this.yAng = true;
 	this.fTrg = true;
+	this.camVel = 0;
+	this.lastXDir = 0;
+	this.lastYDir = 0;
 }
 
 Main.prototype.init = function(){
@@ -202,7 +205,6 @@ Main.prototype.init = function(){
 							that.closePoints = undefined;
 
 							that.showClosest = false;
-							$("#closest").html("<b>Highlight 5 closest games</b>");
 
 							for(var i = 0; i < that.closeDivs.length; i++){
 								that.closeDivs[i].remove();
@@ -256,8 +258,9 @@ Main.prototype.init = function(){
 	document.addEventListener("keydown", function(e){
 		if(that.closedModal && !that.isAnimating){
 			if(e.which == "87"){
-				if(that.selected == null){
-					that.cameraVel = 50;
+				that.cameraVel = 50;
+				if(!(that.selected == null)){
+					$("#unselect").trigger("click");
 				}
 			}
 			else if (e.which == "83"){
@@ -457,7 +460,13 @@ Main.prototype.animating = function(){
 
 	var xdir = (diffAngle < 0) ? 1 : -1;
 
-	if(Math.abs(diffAngle) < 0.05 ) {
+	if(this.lastXDir !== xdir){
+		this.xAng = this.xAng/2;
+	}
+	this.lastXDir = xdir;
+
+
+	if(Math.abs(diffAngle) < 0.005 ) {
 		xdir = 0;
 	}
 
@@ -466,7 +475,12 @@ Main.prototype.animating = function(){
 
 	var ydir = (vDiff < 0) ? 1 : -1;
 
-	if(Math.abs(vDiff) < 0.05 ) {
+	if(this.lastYDir !== ydir){
+		this.yAng = this.yAng/2;
+	}
+	this.lastYDir = ydir;
+
+	if(Math.abs(vDiff) < 0.005 ) {
 		ydir = 0;
 	}
 
@@ -474,6 +488,15 @@ Main.prototype.animating = function(){
 		this.fTrg = false;
 		this.xAng = diffAngle;
 		this.yAng = vDiff;
+
+		//Now we get the initial velocity
+		var distToSelected = this.camera.position.distanceTo(this.selected.position);
+		if(distToSelected > 10000){
+			this.camVel = distToSelected/300;
+		} else {
+			this.camVel = 50;
+		}
+
 	}
 
 	//Get point of focus now...
@@ -489,18 +512,19 @@ Main.prototype.animating = function(){
 	//
 	//Now move on to pushing the camera forward (along the path of towardSelected)
 	//
-	var nextPos = towardSelected.multiplyScalar(50);
+	var nextPos = towardSelected.multiplyScalar(this.camVel);
 
 	//Clamp the camera movement
-	if(this.camera.position.distanceTo(this.selected.position) > 500) {
+	if(this.camera.position.distanceTo(this.selected.position) > 500 + this.camVel) {
 		this.camera.position.x += nextPos.x;
 		this.camera.position.y += nextPos.y;
 		this.camera.position.z += nextPos.z;
 	} else
 
 	//Exit thingy if both thingies happen
-	if(this.camera.position.distanceTo(this.selected.position) < 500 && Math.abs(vDiff) < 0.05 && Math.abs(diffAngle) < 0.05){
+	if(this.camera.position.distanceTo(this.selected.position) < 500  + this.camVel && Math.abs(vDiff) < 0.005 && Math.abs(diffAngle) < 0.005){
 		this.isAnimating = false;
+		this.fTrg = true;
 		$("#gameTitleP").attr("style", "");
 	}
 }
@@ -513,14 +537,14 @@ Main.prototype.renderCloseText = function(){
 
 	function toXYCoords (pos) {
 		var newPos = pos.clone()
-        var v = newPos.project(that.camera);
-        var percX = (v.x + 1) / 2;
-        var percY = (-v.y + 1) / 2;
-        var left = percX * window.innerWidth;
-        var top = percY * window.innerHeight;
+    var v = newPos.project(that.camera);
+    var percX = (v.x + 1) / 2;
+    var percY = (-v.y + 1) / 2;
+    var left = percX * window.innerWidth;
+    var top = percY * window.innerHeight;
 
-        return new THREE.Vector2(left, top);
-    }
+    return new THREE.Vector2(left, top);
+	}
 
 	for(var i = 0; i < this.closeDivs.length; i++){
 		var vert = this.squareHash[this.selected.closest[i]].position;
@@ -541,6 +565,17 @@ Main.prototype.renderCloseText = function(){
 			div.style.display = "none";
 		} else {
 			div.style.display = "";
+		}
+
+		//Another check, if the point is not in frustrum, don't show the text
+		this.camera.updateMatrix();
+		this.camera.updateMatrixWorld();
+		var frustum = new THREE.Frustum();
+		var projScreenMatrix = new THREE.Matrix4();
+		projScreenMatrix.multiplyMatrices( this.camera.projectionMatrix, this.camera.matrixWorldInverse );
+		frustum.setFromMatrix( new THREE.Matrix4().multiplyMatrices( this.camera.projectionMatrix, this.camera.matrixWorldInverse ) );
+		if(!frustum.containsPoint( vert )){
+		    div.style.display = "none";
 		}
 
 		div.style.left = newPos.x + "px";
@@ -734,9 +769,9 @@ Main.prototype.readGames = function(gameFile){
 			//set up physical game object
 			var myGame = data[i];
 
-			var obj = new GameObject(myGame.id, myGame.coords[0]*60000, myGame.coords[1]*60000, myGame.coords[2]*60000, myGame.title, myGame["wiki_url"], myGame.platform, myGame.year);
+			var obj = new GameObject(myGame.id, myGame.coords[0]*30000000, myGame.coords[1]*30000000, myGame.coords[2]*30000000, myGame.title, myGame["wiki_url"], myGame.platform, myGame.year);
 
-			var vert = new THREE.Vector3(myGame.coords[0]*60000, myGame.coords[1]*60000, myGame.coords[2]*60000);
+			var vert = new THREE.Vector3(myGame.coords[0]*30000000, myGame.coords[1]*30000000, myGame.coords[2]*30000000);
 			vert.id = obj.id;
 			that.squareHash[obj.id] = obj;
 
@@ -942,7 +977,7 @@ Main.prototype.readGames = function(gameFile){
 	asyncLoad7();
 
 	$("#closest").on("click", function(){
-		if($(this).text() === "Highlight 5 closest games"){
+		if(!that.showClosest){
 			var newCloudMaterial = new THREE.PointCloudMaterial( {size: 350, map: that.circleSprite, transparent: true, blending: THREE.AdditiveBlending,  depthWrite: false, color: 0xff0000});
 
 			var newGeometry = new THREE.Geometry();
@@ -966,8 +1001,6 @@ Main.prototype.readGames = function(gameFile){
 			that.scene.add(that.closePoints);
 
 			that.showClosest = true;
-			$(this).html("<b>Hide 5 closest games</b>");
-
 		} else {
 
 			that.scene.remove(that.closePoints);
@@ -980,7 +1013,6 @@ Main.prototype.readGames = function(gameFile){
 			that.closeDivs = [];
 
 			that.showClosest = false;
-			$(this).html("<b>Highlight 5 closest games</b>");
 		}
 	});
 
@@ -1012,7 +1044,6 @@ $("#unselect").on("click", function(){
 			game.closeDivs = [];
 
 			game.showClosest = false;
-			$("#closest").html("<b>Highlight 5 closest games</b>");
 		}
 	}
 
