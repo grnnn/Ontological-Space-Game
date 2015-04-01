@@ -279,16 +279,19 @@ Main.prototype.init = function(){
 			if(e.which == "37"){
 
 				that.leftArrow = true;
-
+				that.hasRightPressed = true;
 			}
 			if(e.which == "38"){
 				that.upArrow = true;
+				that.hasRightPressed = true;
 			}
 			if(e.which == "39"){
 				that.rightArrow = true;
+				that.hasRightPressed = true;
 			}
 			if(e.which == "40"){
 				that.downArrow = true;
+				that.hasRightPressed = true;
 			}
 		}
 	});
@@ -415,6 +418,18 @@ Main.prototype.update = function(){
 								  lookAtVec.z + this.camera.position.z);
 			this.pushRotateCamera(xMovement, yMovement, pof, 50);
 
+
+		}
+
+		if(this.selected !== null && this.leftArrow || this.selected !== null && this.rightArrow || this.selected !== null && this.upArrow || this.selected !== null && this.downArrow){
+			var xMovement = 0.0;
+			var yMovement = 0.0;
+
+			if(this.leftArrow) xMovement = -0.02;
+			if(this.rightArrow) xMovement = 0.02;
+			if(this.upArrow) yMovement = 0.02;
+			if(this.downArrow) yMovement = -0.02;
+			this.pushRotateCamera(xMovement, yMovement, this.selected.position, 500);
 
 		}
 
@@ -607,8 +622,8 @@ Main.prototype.pushRotateCamera = function(pushX, pushY, position, distance){
 	this.yAngle += pushY;
 
 	//check so that we don't rotate behind the object
-	if(this.yAngle > -0.001) this.yAngle = -0.001;
-	if(this.yAngle < -Math.PI) this.yAngle = -Math.PI;
+	if(this.yAngle > -0.01) this.yAngle = -0.01;
+	if(this.yAngle < -Math.PI+0.01) this.yAngle = -Math.PI+0.01;
 
 	//This algorithm was taken from the "OrbitControls.js" package that is included with three.js.
 	//Given the new angles of rotation, this is how we calculate the offset coordinates of the camera
@@ -1116,7 +1131,7 @@ function showResponse(response) {
 
 }
 Main.prototype.googleApiClientReady = function() {
-    gapi.client.setApiKey("AIzaSyCkI9GbnathWCIQBJH-CX3lKftRthDg-4w");
+    gapi.client.setApiKey("AIzaSyA6hUiMdEq7Wsp1kJ7hd7pm5gWYl3rgP0c");
      gapi.client.load('youtube', 'v3', Main.prototype.searchYT);
 
 }
