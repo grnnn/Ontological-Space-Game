@@ -38,7 +38,7 @@ var Main = function(w, h, gameFile){
 	this.loader;
 
 
-	this.startId = 0; // starting game id
+	this.startId = Math.floor(Math.random()*11000); // starting game id
 
 	this.cameraVel = 0;
 
@@ -172,24 +172,6 @@ Main.prototype.init = function(){
 
 					var intersections = raycaster.intersectObjects(that.gameSquares);
 
-					if(intersections[0] !== undefined && that.selected !== null){
-
-						if(intersections[0].object.funk === "wiki"){
-							that.openWiki();
-						}
-						else if(intersections[0].object.funk === "utube"){
-							that.googleApiClientReady();
-						}
-						else if(intersections[0].object.funk === "pix"){
-							that.searchImages();
-						}
-						else if(intersections[0].object.funk === "gamenet"){
-							that.searchGamenet();
-						}
-
-
-					}
-
 					raycaster = new THREE.Raycaster();
 					raycaster.far = 5000;
 					raycaster.params.PointCloud.threshold = 50;
@@ -216,17 +198,10 @@ Main.prototype.init = function(){
 						that.selected = that.squareHash[id];
 						that.hasRightPressed = false;
 						that.startVector = new THREE.Vector3(that.selected.x + 500, that.selected.y, that.selected.z);
-						that.q1.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-						that.q2.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-						that.q3.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-						that.q4.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-						that.q1.material.visible = true;
-						that.q2.material.visible = true;
-						that.q3.material.visible = true;
-						that.q4.material.visible = true;
 						$("#gameTitleP").html("<b><center>" + that.selected.gameTitle + "<br>" + that.selected.year + "</center></b>");
 						$("#gameTitleP").attr("style", "display: none;");
 						that.isAnimating = true;
+						that.displayPanels(false);
 					}
 				}
 
@@ -238,21 +213,17 @@ Main.prototype.init = function(){
 			}
 		}
 	});
-	document.addEventListener("keypress", function(e){
-		/*if(that.closedModal){
-			if (e.which == "106"){
-				that.googleApiClientReady();
-			}
-			else if (e.which == "107"){
-				that.openWiki();
-			}
-			else if (e.which == "108"){
-				that.searchImages();
-			}
-			else if (e.which == "109"){
-				that.searchGamenet();
-			}
-		}*/
+	$("#youtubePanel").on("click", function(){
+		that.googleApiClientReady();
+	});
+	$("#photoPanel").on("click", function(){
+		that.searchImages();
+	});
+	$("#wikiPanel").on("click", function(){
+		that.openWiki();
+	});
+	$("#gamenetPanel").on("click", function(){
+		that.searchGamenet();
 	});
 
 	document.addEventListener("keydown", function(e){
@@ -271,9 +242,9 @@ Main.prototype.init = function(){
 
 			if(e.which == "16"){
 				if(that.cameraVel == 50){
-					that.cameraVel = 100;
+					that.cameraVel = 250;
 				} else if(that.cameraVel == -50){
-					that.cameraVel = -100;
+					that.cameraVel = -250;
 				}
 			}
 			if(e.which == "37"){
@@ -310,9 +281,9 @@ Main.prototype.init = function(){
 			}
 
 			if(e.which == "16"){
-				if(that.cameraVel == 100){
+				if(that.cameraVel == 250){
 					that.cameraVel = 50;
-				} else if(that.cameraVel == -100){
+				} else if(that.cameraVel == -250){
 					that.cameraVel = -50;
 				}
 			}
@@ -343,6 +314,21 @@ Main.prototype.init = function(){
 
 	}, false);
 
+}
+
+Main.prototype.displayPanels = function(on){
+	if(on){
+		$("#youtubePanel").css("display", "");
+		$("#photoPanel").css("display", "");
+		$("#wikiPanel").css("display", "");
+		$("#gamenetPanel").css("display", "");
+	} else {
+		$("#youtubePanel").css("display", "none");
+		$("#photoPanel").css("display", "none");
+		$("#wikiPanel").css("display", "none");
+		$("#gamenetPanel").css("display", "none");
+	}
+	
 }
 
 Main.prototype.update = function(){
@@ -541,6 +527,7 @@ Main.prototype.animating = function(){
 		this.isAnimating = false;
 		this.fTrg = true;
 		$("#gameTitleP").attr("style", "");
+		this.displayPanels(true);
 	}
 }
 
@@ -701,77 +688,32 @@ Main.prototype.readGames = function(gameFile){
 
 	var that = this;
 
-	this.wikiTex = THREE.ImageUtils.loadTexture("media/wiki_logo.png", undefined, function(){
-		wikiTexLoaded = true;
-		if(wikiTexLoaded && picTexLoaded && utubeTexLoaded && gNetLoaded){
-			that.texturesLoaded = true;
-		}
-	}, function(){
-		alert("Wikipedia Texture failed to load");
-	});
-
-	this.utubeTex = THREE.ImageUtils.loadTexture("media/youtube_logo.png", undefined, function(){
-		picTexLoaded = true;
-		if(wikiTexLoaded && picTexLoaded && utubeTexLoaded && gNetLoaded){
-			that.texturesLoaded = true;
-		}
-	}, function(){
-		alert("Youtube Texture failed to load");
-	});
-
-	this.picTex = THREE.ImageUtils.loadTexture("media/Camera_icon.png", undefined, function(){
-		utubeTexLoaded = true;
-		if(wikiTexLoaded && picTexLoaded && utubeTexLoaded && gNetLoaded){
-			that.texturesLoaded = true;
-		}
-	}, function(){
-		alert("Picture Texture failed to load");
-	});
-
-	this.gNetTex = THREE.ImageUtils.loadTexture("media/gameNet-logo.png", undefined, function(){
-		gNetLoaded = true;
-		if(wikiTexLoaded && picTexLoaded && utubeTexLoaded && gNetLoaded){
-			that.texturesLoaded = true;
-		}
-	}, function(){
-		alert("Gamenet Texture failed to load");
-	});
-
 	this.circleSprite = THREE.ImageUtils.loadTexture("media/sphere.png", undefined, function(){
 		console.log("sphere texture loaded")
 	}, function(){
 		alert("Sphere texture failed to load");
 	});
 
+	//Set up absolute panes
+	var paneWidth = that.width/12;
+	var paneDelta = that.width/15;
+	$("#paneHolder").append("<div id='youtubePanel' class='panel panel-default' style='background-color: #f20000;top: "+(that.height/2-paneWidth/2-paneDelta)+"; left: "+(that.width/2-paneWidth/2-paneDelta)+"; width: "+paneWidth+"; height: "+paneWidth+"; position: absolute;'>" +
+									"<center><img class='img-responsive' src='media/youtube_logo.jpg' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%;'></center>" +
+							"</div>"
+							);
+	$("#paneHolder").append("<div id='photoPanel' class='panel panel-default' style='top: "+(that.height/2-paneWidth/2+paneDelta)+"; left: "+(that.width/2-paneWidth/2-paneDelta)+"; width: "+paneWidth+"; height: "+paneWidth+"; position: absolute;'>" +
+									"<center><img class='img-responsive' src='media/camera_icon.gif' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%;'></center>" +
+							"</div>"
+							);
+	$("#paneHolder").append("<div id='wikiPanel' class='panel panel-default' style='top: "+(that.height/2-paneWidth/2-paneDelta)+"; left: "+(that.width/2-paneWidth/2+paneDelta)+"; width: "+paneWidth+"; height: "+paneWidth+"; position: absolute;'>" +
+									"<center><img class='img-responsive' src='media/Wikipedia-W.png' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%;'></center>" +
+							"</div>"
+							);
+	$("#paneHolder").append("<div id='gamenetPanel' class='panel panel-default' style='background-color: #ff5500;top: "+(that.height/2-paneWidth/2+paneDelta)+"; left: "+(that.width/2-paneWidth/2+paneDelta)+"; width: "+paneWidth+"; height: "+paneWidth+"; position: absolute;'>" +
+									"<center><img class='img-responsive' src='media/gamenet.png' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%;'></center>" +
+							"</div>"
+							);
 
-	//Set up quarter meshes
-	this.q1 = new THREE.Mesh(
-		new THREE.SphereGeometry(53, 7, 7, 0, Math.PI/2, 0, Math.PI),
-		new THREE.MeshPhongMaterial( { map: this.wikiTex } ) );
-	this.q2 = new THREE.Mesh(
-		new THREE.SphereGeometry(53, 7, 7, Math.PI/2, Math.PI/2, 0, Math.PI),
-		new THREE.MeshPhongMaterial( { map: this.utubeTex } ) );
-	this.q3 = new THREE.Mesh(
-		new THREE.SphereGeometry(53, 7, 7, Math.PI, Math.PI/2, 0, Math.PI),
-		new THREE.MeshPhongMaterial( { map: this.picTex } ) );
-	this.q4 = new THREE.Mesh(
-		new THREE.SphereGeometry(53, 7, 7, 3*Math.PI/2, Math.PI/2, 0, Math.PI),
-		new THREE.MeshPhongMaterial( {map: this.gNetTex} ) );
-
-	this.scene.add(this.q1);
-	this.scene.add(this.q2);
-	this.scene.add(this.q3);
-	this.scene.add(this.q4);
-
-	this.q1.funk = "wiki";
-	this.q2.funk = "utube";
-	this.q3.funk = "pix";
-	this.q4.funk = "gamenet";
-
-	this.gameSquares.push(this.q1);
-	this.gameSquares.push(this.q2);
-	this.gameSquares.push(this.q3);
-	this.gameSquares.push(this.q4);
 
 	this.cloudMaterial = new THREE.PointCloudMaterial( {size: 250, map: this.circleSprite, transparent: true, blending: THREE.AdditiveBlending,  depthWrite: false});
 
@@ -796,10 +738,6 @@ Main.prototype.readGames = function(gameFile){
 			//set first obj to selected
 			if(obj.id == that.startId){
 				that.selected = obj;
-				that.q1.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-				that.q2.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-				that.q3.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-				that.q4.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
 				$("#gameTitleP").html("<b><center>" + that.selected.gameTitle + "<br>" + that.selected.year + "</center></b>");
 			}
 
@@ -1005,7 +943,7 @@ Main.prototype.readGames = function(gameFile){
 				var text = document.createElement('div');
 				text.style.position = 'absolute';
 
-				text.innerHTML = "<b style='color: #ff0000;'><center>" + obj.gameTitle + "<br>" + obj.year + "</center></b>"
+				text.innerHTML = "<b style='color: #ff0000; text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;'><center>" + obj.gameTitle + "<br>" + obj.year + "</center></b>"
 
 				document.body.appendChild(text);
 				that.closeDivs.push(text);
@@ -1040,10 +978,7 @@ Main.prototype.readGames = function(gameFile){
 //Listener for deselecting objects
 $("#unselect").on("click", function(){
 	if(game.selected !== null){
-		game.q1.material.visible = false;
-		game.q2.material.visible = false;
-		game.q3.material.visible = false;
-		game.q4.material.visible = false;
+		game.displayPanels(false);
 		game.selected = null;
 		$(this).attr("disabled", "disabled");
 		$("#gameTitleP").text(" ");
@@ -1181,14 +1116,6 @@ Main.prototype.findGame = function(id){
 	that.selected = that.squareHash[id];
 	that.hasRightPressed = false;
 	that.startVector = new THREE.Vector3(that.selected.x + 500, that.selected.y, that.selected.z);
-	that.q1.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-	that.q2.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-	that.q3.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-	that.q4.position.set(that.selected.position.x, that.selected.position.y, that.selected.position.z);
-	that.q1.material.visible = true;
-	that.q2.material.visible = true;
-	that.q3.material.visible = true;
-	that.q4.material.visible = true;
 	$("#gameTitleP").html("<b><center>" + that.selected.gameTitle + "<br>" + that.selected.year + "</center></b>");
 }
 
