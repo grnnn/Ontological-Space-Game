@@ -342,23 +342,23 @@ Main.prototype.update = function(){
 		//Get force of angle "push" from difference between current mouse pos and starting mouse pos
 		//We cap the movement of it so that, when distance is increased, the rotation doesn't increase dramatically
 		if(this.rightMouseDown && this.selected !== null){
-			var xMovement = -(this.rightLocation.x - this.mousePos.x)/10000;
-			var yMovement = (this.rightLocation.y - this.mousePos.y)/10000;
-			if(xMovement > 0.03) xMovement = 0.03;
-			if(xMovement < -0.03) xMovement = -0.03;
-			if(yMovement > 0.01) yMovement = 0.01;
-			if(yMovement < -0.01) yMovement = -0.01;
+			var xMovement = (this.rightLocation.x - this.mousePos.x)/10000;
+			var yMovement = -(this.rightLocation.y - this.mousePos.y)/10000;
+			if(xMovement > 0.1) xMovement = 0.1;
+			if(xMovement < -0.1) xMovement = -0.1;
+			if(yMovement > 0.07) yMovement = 0.07;
+			if(yMovement < -0.07) yMovement = -0.07;
 			this.pushRotateCamera(xMovement, yMovement, this.selected.position, 500);
 
 		}
 
 		if(this.leftMouseDown && this.selected == null){
-			var xPan = -(this.leftLocation.x - this.mousePos.x)/50;
-			var yPan = (this.leftLocation.y - this.mousePos.y)/50;
-			if(xPan > 10) xPan = 10;
-			if(xPan < -10) xPan = -10;
-			if(yPan > 10) yPan = 10;
-			if(yPan < -10) yPan = -10;
+			var xPan = -(this.leftLocation.x - this.mousePos.x)/5;
+			var yPan = (this.leftLocation.y - this.mousePos.y)/5;
+			if(xPan > 50) xPan = 50;
+			if(xPan < -50) xPan = -50;
+			if(yPan > 50) yPan = 50;
+			if(yPan < -50) yPan = -50;
 			this.pushPan(xPan, yPan);
 		}
 
@@ -366,10 +366,10 @@ Main.prototype.update = function(){
 
 			var xMovement = (this.rightLocation.x - this.mousePos.x)/10000;
 			var yMovement = -(this.rightLocation.y - this.mousePos.y)/10000;
-			if(xMovement > 0.01) xMovement = 0.01;
-			if(xMovement < -0.01) xMovement = -0.01;
-			if(yMovement > 0.01) yMovement = 0.01;
-			if(yMovement < -0.01) yMovement = -0.01;
+			if(xMovement > 0.07) xMovement = 0.07;
+			if(xMovement < -0.07) xMovement = -0.07;
+			if(yMovement > 0.05) yMovement = 0.05;
+			if(yMovement < -0.05) yMovement = -0.05;
 			var lookAtVec = new THREE.Vector3(0, 0, -50);
 			lookAtVec.applyQuaternion( this.camera.quaternion );
 
@@ -411,10 +411,10 @@ Main.prototype.update = function(){
 			var xMovement = 0.0;
 			var yMovement = 0.0;
 
-			if(this.leftArrow) xMovement = -0.02;
-			if(this.rightArrow) xMovement = 0.02;
-			if(this.upArrow) yMovement = 0.02;
-			if(this.downArrow) yMovement = -0.02;
+			if(this.leftArrow) xMovement = 0.02;
+			if(this.rightArrow) xMovement = -0.02;
+			if(this.upArrow) yMovement = -0.02;
+			if(this.downArrow) yMovement = 0.02;
 			this.pushRotateCamera(xMovement, yMovement, this.selected.position, 500);
 
 		}
@@ -605,12 +605,16 @@ Main.prototype.cameraUpdate = function(){
 Main.prototype.pushRotateCamera = function(pushX, pushY, position, distance){
 
 	//apply the push number to the current angles
-	this.xAngle += pushX;
+	if(Math.sin(this.yAngle) > 0){
+		this.xAngle += pushX;
+	} else {
+		this.xAngle -= pushX;
+	}
 	this.yAngle += pushY;
 
 	//check so that we don't rotate behind the object
-	if(this.yAngle > -0.01) this.yAngle = -0.01;
-	if(this.yAngle < -Math.PI+0.01) this.yAngle = -Math.PI+0.01;
+	//if(this.yAngle > -0.01) this.yAngle = -0.01;
+	//if(this.yAngle < -Math.PI+0.01) this.yAngle = -Math.PI+0.01;
 
 	//This algorithm was taken from the "OrbitControls.js" package that is included with three.js.
 	//Given the new angles of rotation, this is how we calculate the offset coordinates of the camera
@@ -626,8 +630,9 @@ Main.prototype.pushRotateCamera = function(pushX, pushY, position, distance){
 
 
 	//Make a call to zoom to change camera
+	var upVec = (Math.sin(this.yAngle) > 0 ) ? (new THREE.Vector3(0, 1, 0)) : (new THREE.Vector3(0, -1, 0));
+	this.camera.up = upVec;
 	this.camera.lookAt(position);
-
 
 
 }
