@@ -1184,31 +1184,34 @@ function searchComplete(){
         for (var i = 0; i < 5 || i<results.length; i++) {
             // For each result write it's title and image to the screen
             var result = results[i];
-            if(result == null){}
-            else{
+
+            if(result != undefined){
             	imagesHTML+="<img style='width:600px; height:auto; margin:0 100' src=' " + result.url + " ' >";
-        	}
+            }
 
         }
-        var $dialog3 = $('<div></div>')
-               .html('<iframe style="border: 0px;" width="0px" height="0px"></iframe>')
-               .dialog({
-                	title: "Google Image Search",
-    				autoOpen: false,
-    				dialogClass: 'dialog_fixed,ui-widget-header',
-    				modal: false,
-    				height: 500,
-    				width: 800,
-    				minWidth: 400,
-    				minHeight: 250,
-    				maxWidth: 1280,
-    				maxHeight: 720,
-    				resizable:true,
-    				draggable:true,
-    				close: function () { $(this).remove(); },
-               });
-        $dialog3.append(imagesHTML);
-        $(".ui-dialog-titlebar-close").attr("style", "background-color:red; ");
-        $dialog3.dialog('open');
+        function displayDialog(){
+	        var $dialog3 = $('<div></div>')
+	               .html('<iframe style="border: 0px;" width="0px" height="0px"></iframe>')
+	               .dialog({
+	                	title: "Google Image Search",
+	    				autoOpen: false,
+	    				dialogClass: 'dialog_fixed,ui-widget-header',
+	    				modal: false,
+	    				height: 500,
+	    				width: 800,
+	    				minWidth: 400,
+	    				minHeight: 250,
+	    				maxWidth: 1280,
+	    				maxHeight: 720,
+	    				resizable:true,
+	    				draggable:true,
+	    				close: function () { $(this).remove(); },
+	               });
+	        $dialog3.append(imagesHTML);
+	        $(".ui-dialog-titlebar-close").attr("style", "background-color:red; ");
+	        $dialog3.dialog('open');
+	    }
+	    displayDialog();
     }
 }
