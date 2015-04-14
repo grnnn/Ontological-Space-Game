@@ -141,20 +141,22 @@
                         var selectedGameID = ui.item.id;
                         game.findGame(selectedGameID);
                         $(this).val("");
-												if(game.showClosest){
-													game.scene.remove(game.closePoints);
-													game.closePoints = undefined;
+						if(game.showClosest){
+							game.scene.remove(game.closePoints);
+							game.closePoints = undefined;
 
-													game.showClosest = false;
+							game.showClosest = false;
 
-													for(var i = 0; i < game.closeDivs.length; i++){
-														game.closeDivs[i].remove();
-													}
+							for(var i = 0; i < game.closeDivs.length; i++){
+								game.closeDivs[i].remove();
+							}
 
-													game.closeDivs = [];
-												}
-												game.isAnimating = true;
-												$("#gameTitleP").attr("style", "display: none;");
+							game.closeDivs = [];
+						}
+						game.isAnimating = true;
+						game.displayPanels(false);
+						that.selectedModel.visible = false;
+						$("#gameTitleP").attr("style", "display: none;");
                     }
 		        });
 		    });

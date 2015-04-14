@@ -56,6 +56,9 @@ var Main = function(w, h, gameFile){
 	this.camVel = 0;
 	this.lastXDir = 0;
 	this.lastYDir = 0;
+
+	this.paneDelta = 0;
+	this.paneWidth = 0;
 }
 
 Main.prototype.init = function(){
@@ -163,7 +166,9 @@ Main.prototype.init = function(){
 	document.addEventListener("mouseup", function(e){
 		if(that.closedModal && !that.isAnimating){
 			if(e.which == "1"){
-				if(that.mousePos.distanceTo(that.selectionLoc) < 5 && that.mousePos.y > 50){
+				if(that.mousePos.distanceTo(that.selectionLoc) < 5 && that.mousePos.y > 50 
+					&& (  that.selected == null || ((that.mousePos.y < that.height/2 - that.paneWidth/2 - that.paneDelta) || (that.mousePos.x < that.width/2 - that.paneWidth/2 - that.paneDelta) 
+					|| (that.mousePos.y > that.height/2 + that.paneWidth/2 + that.paneDelta) || (that.mousePos.x > that.width/2 + that.paneWidth/2 + that.paneDelta) ) ) ){
 					that.rayVector.set((that.mousePos.x/window.innerWidth) * 2 - 1, -(that.mousePos.y/window.innerHeight) * 2 + 1, 0.5).unproject(that.camera);
 					that.rayVector.sub(that.camera.position).normalize();
 
@@ -202,6 +207,8 @@ Main.prototype.init = function(){
 						$("#gameTitleP").attr("style", "display: none;");
 						that.isAnimating = true;
 						that.displayPanels(false);
+						that.selectedModel.visible = false;
+						that.selectedModel.position.copy(that.selected.position);
 					}
 				}
 
@@ -343,7 +350,7 @@ Main.prototype.update = function(){
 		//We cap the movement of it so that, when distance is increased, the rotation doesn't increase dramatically
 		if(this.rightMouseDown && this.selected !== null){
 			var xMovement = (this.rightLocation.x - this.mousePos.x)/10000;
-			var yMovement = -(this.rightLocation.y - this.mousePos.y)/10000;
+			var yMovement = (this.rightLocation.y - this.mousePos.y)/10000;
 			if(xMovement > 0.1) xMovement = 0.1;
 			if(xMovement < -0.1) xMovement = -0.1;
 			if(yMovement > 0.07) yMovement = 0.07;
@@ -365,7 +372,7 @@ Main.prototype.update = function(){
 		if(this.rightMouseDown && this.selected == null){
 
 			var xMovement = (this.rightLocation.x - this.mousePos.x)/10000;
-			var yMovement = -(this.rightLocation.y - this.mousePos.y)/10000;
+			var yMovement = (this.rightLocation.y - this.mousePos.y)/10000;
 			if(xMovement > 0.07) xMovement = 0.07;
 			if(xMovement < -0.07) xMovement = -0.07;
 			if(yMovement > 0.05) yMovement = 0.05;
@@ -394,8 +401,8 @@ Main.prototype.update = function(){
 
 			if(this.leftArrow) xMovement = 0.01;
 			if(this.rightArrow) xMovement = -0.01;
-			if(this.upArrow) yMovement = -0.01;
-			if(this.downArrow) yMovement = 0.01;
+			if(this.upArrow) yMovement = 0.01;
+			if(this.downArrow) yMovement = -0.01;
 			var lookAtVec = new THREE.Vector3(0, 0, -50);
 			lookAtVec.applyQuaternion( this.camera.quaternion );
 
@@ -507,8 +514,11 @@ Main.prototype.animating = function(){
 							lookAtVec.y + this.camera.position.y,
 							lookAtVec.z + this.camera.position.z);
 
+	var xdir2 = Math.sin(this.yAngle) > 0 ? -1 : 1;
+	var ydir2 = Math.sin(this.yAngle) > 0 ? -1 : 1;
+
 	//Do the actual rotation, should always take a short amount of time
-	this.pushRotateCamera(  (Math.abs(this.xAng)/30) * xdir,  (Math.abs(this.yAng)/15) * ydir, pof, 50);
+	this.pushRotateCamera(  -(Math.abs(this.xAng)/30) * xdir * xdir2,  (Math.abs(this.yAng)/15) * ydir * ydir2, pof, 50);
 
 	//
 	//Now move on to pushing the camera forward (along the path of towardSelected)
@@ -528,6 +538,8 @@ Main.prototype.animating = function(){
 		this.fTrg = true;
 		$("#gameTitleP").attr("style", "");
 		this.displayPanels(true);
+		this.selectedModel.visible = true;
+		this.selectedModel.position.copy(this.selected.position);
 	}
 }
 
@@ -702,6 +714,8 @@ Main.prototype.readGames = function(gameFile){
 	//Set up absolute panes
 	var paneWidth = that.width/12;
 	var paneDelta = that.width/15;
+	this.paneWidth = paneWidth;
+	this.paneDelta = paneDelta;
 	$("#paneHolder").append("<div id='youtubePanel' class='panel panel-default' style='background-color: #f20000;top: "+(that.height/2-paneWidth/2-paneDelta)+"; left: "+(that.width/2-paneWidth/2-paneDelta)+"; width: "+paneWidth+"; height: "+paneWidth+"; position: absolute;'>" +
 									"<center><img class='img-responsive' src='media/youtube_logo.jpg' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%;'></center>" +
 							"</div>"
@@ -719,6 +733,10 @@ Main.prototype.readGames = function(gameFile){
 							"</div>"
 							);
 
+	this.selectedModel = new THREE.Sprite( new THREE.SpriteMaterial({color: 0x3176B2, map: that.circleSprite}));
+	this.selectedModel.scale.copy(new THREE.Vector3(100, 100, 100));
+	this.selectedModel.visible = false;
+	this.scene.add(this.selectedModel);
 
 	this.cloudMaterial = new THREE.PointCloudMaterial( {size: 250, map: this.circleSprite, transparent: true, blending: THREE.AdditiveBlending,  depthWrite: false});
 
@@ -744,6 +762,8 @@ Main.prototype.readGames = function(gameFile){
 			if(obj.id == that.startId){
 				that.selected = obj;
 				$("#gameTitleP").html("<b><center>" + that.selected.gameTitle + "<br>" + that.selected.year + "</center></b>");
+				that.selectedModel.visible = true;
+				that.selectedModel.position.copy(that.selected.position);
 			}
 
 
@@ -985,6 +1005,7 @@ $("#unselect").on("click", function(){
 	if(game.selected !== null){
 		game.displayPanels(false);
 		game.selected = null;
+		game.selectedModel.visible = false;
 		$(this).attr("disabled", "disabled");
 		$("#gameTitleP").text(" ");
 		$("#closest").attr("disabled", "disabled");
