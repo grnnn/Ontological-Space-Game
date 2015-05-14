@@ -721,7 +721,7 @@ Main.prototype.readGames = function(gameFile){
 							"</div>"
 							);
 	$("#paneHolder").append("<div id='photoPanel' class='panel panel-default' style='top: "+(that.height/2-paneWidth/2+paneDelta)+"; left: "+(that.width/2-paneWidth/2-paneDelta)+"; width: "+paneWidth+"; height: "+paneWidth+"; position: absolute;'>" +
-									"<center><img class='img-responsive' src='media/camera_icon.gif' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%;'></center>" +
+									"<center><img class='img-responsive' src='media/Camera_icon.gif' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%;'></center>" +
 							"</div>"
 							);
 	$("#paneHolder").append("<div id='wikiPanel' class='panel panel-default' style='top: "+(that.height/2-paneWidth/2-paneDelta)+"; left: "+(that.width/2-paneWidth/2+paneDelta)+"; width: "+paneWidth+"; height: "+paneWidth+"; position: absolute;'>" +
